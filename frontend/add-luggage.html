@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AirTrace Staff Dashboard — Register found items, manage claims and update statuses.">
+    <title>Staff Dashboard — AirTrace</title>
+    <!-- <meta name="api-base-url" content="https://your-backend.onrender.com"> -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">✈</div>
+                Air<span>Trace</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="search.html">Find Luggage</a></li>
+                <li class="nav-cta"><a href="staff-login.html">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Back Button -->
+    <div class="container page-top-bar">
+        <a href="staff-login.html" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Back to Login
+        </a>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+
+            <div class="page-header">
+                <h2>Staff Dashboard</h2>
+                <p>Register found items, create passenger claims, and update item statuses.</p>
+            </div>
+
+            <!-- 1. Register Found Item -->
+            <div class="panel">
+                <h3>
+                    <div class="panel-icon">📦</div>
+                    Register Found Item
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="flightNumber">Flight Number</label>
+                        <select id="flightNumber" required>
+                            <option value="">Select a flight…</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryId">Item Category</label>
+                        <select id="categoryId" required>
+                            <option value="">Select category…</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemName">Item Name</label>
+                        <input type="text" id="itemName" placeholder="e.g., Black Samsonite suitcase" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="serialNumber">Serial / Tag Number</label>
+                        <input type="text" id="serialNumber" placeholder="e.g., SN-4821-X (optional)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemDescription">Description</label>
+                    <textarea id="itemDescription" rows="3"
+                        placeholder="Colour, size, distinguishing features…"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="locationId">Where Was It Found?</label>
+                        <select id="locationId">
+                            <option value="">Select location…</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemStatus">Status</label>
+                        <select id="itemStatus" required>
+                            <option value="Found">Found</option>
+                            <option value="Lost">Lost (Reported)</option>
+                            <option value="Verified">Verified</option>
+                            <option value="Returned">Returned</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="addItem()" class="btn btn-primary">Add Item to System</button>
+                    <button onclick="clearForm()" class="btn btn-secondary">Clear Form</button>
+                </div>
+                <div id="addMessage" class="success" style="display:none;"></div>
+                <div id="addError" class="error" style="display:none;"></div>
+            </div>
+
+            <div class="section-divider"><span>Claim Management</span></div>
+
+            <!-- 2. Create Claim -->
+            <div class="panel">
+                <h3>
+                    <div class="panel-icon">📋</div>
+                    Create Passenger Claim
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="passengerId">Passenger ID</label>
+                        <input type="number" id="passengerId" placeholder="e.g., 7">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemId">Item ID</label>
+                        <input type="number" id="itemId" placeholder="e.g., 23">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="proofOfOwnership">Proof of Ownership</label>
+                    <textarea id="proofOfOwnership" rows="3"
+                        placeholder="Boarding pass, receipt number, photo ID detail…"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="createClaim()" class="btn btn-primary">File Claim</button>
+                    <button onclick="clearForm()" class="btn btn-secondary">Clear</button>
+                </div>
+                <div id="claimMessage" class="success" style="display:none;"></div>
+                <div id="claimError" class="error" style="display:none;"></div>
+            </div>
+
+            <div class="section-divider"><span>Status Updates</span></div>
+
+            <!-- 3. Update Status -->
+            <div class="panel">
+                <h3>
+                    <div class="panel-icon">🔄</div>
+                    Update Item Status
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="updateItemId">Item ID</label>
+                        <input type="number" id="updateItemId" placeholder="e.g., 23">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateStatus">New Status</label>
+                        <select id="updateStatus">
+                            <option value="">Select status…</option>
+                            <option value="Found">Found</option>
+                            <option value="Lost">Lost</option>
+                            <option value="Verified">Verified</option>
+                            <option value="Returned">Returned</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="updateItemStatus()" class="btn btn-primary">Update Status</button>
+                    <button onclick="clearForm()" class="btn btn-secondary">Clear</button>
+                </div>
+                <div id="updateMessage" class="success" style="display:none;"></div>
+                <div id="updateError" class="error" style="display:none;"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-logo">✈ AirTrace</div>
+            <p>&copy; 2026 AirTrace. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="search.html">Find Luggage</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

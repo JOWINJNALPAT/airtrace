@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Search for lost luggage by flight number or claim ID — AirTrace.">
+    <title>Find Luggage — AirTrace</title>
+    <!-- <meta name="api-base-url" content="https://your-backend.onrender.com"> -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">✈</div>
+                Air<span>Trace</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="search.html" class="active">Find Luggage</a></li>
+                <li class="nav-cta"><a href="staff-login.html">Staff Portal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Back Button -->
+    <div class="container page-top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h2>Find Your Luggage</h2>
+                <p>Enter your flight number or claim reference to check the current status of your item.</p>
+            </div>
+
+            <div class="panel">
+                <h3>
+                    <div class="panel-icon">🔍</div>
+                    Search by Flight or Claim ID
+                </h3>
+
+                <div class="form-group">
+                    <label for="flightNumber">Flight Number</label>
+                    <input type="text" id="flightNumber" placeholder="e.g., AI302 or BA123">
+                </div>
+
+                <div class="search-divider"><span>or</span></div>
+
+                <div class="form-group">
+                    <label for="claimId">Claim ID</label>
+                    <input type="text" id="claimId" placeholder="e.g., 1042">
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="searchItems()" class="btn btn-primary">Search Items &rarr;</button>
+                    <button onclick="clearSearchFields()" class="btn btn-secondary">Clear</button>
+                </div>
+            </div>
+
+            <div id="loadingMessage" class="loading" style="display:none;">Searching records…</div>
+            <div id="errorMessage" class="error" style="display:none;"></div>
+            <div id="resultsSection" class="results-section" style="display:none;"></div>
+            <div id="noResultsMessage" class="info-box" style="display:none;">
+                No items found. Please double-check your flight number or claim ID. If still not found, contact our lost
+                &amp; found desk.
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-logo">✈ AirTrace</div>
+            <p>&copy; 2026 AirTrace. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="staff-login.html">Staff</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        function clearSearchFields() {
+            document.getElementById('flightNumber').value = '';
+            document.getElementById('claimId').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('noResultsMessage').style.display = 'none';
+        }
+        window.addEventListener('DOMContentLoaded', function () {
+            const p = new URLSearchParams(window.location.search);
+            if (p.get('flight')) {
+                document.getElementById('flightNumber').value = p.get('flight');
+                setTimeout(() => searchItems(), 120);
+            } else if (p.get('claim')) {
+                document.getElementById('claimId').value = p.get('claim');
+                setTimeout(() => searchItems(), 120);
+            }
+        });
+    </script>
+</body>
+
+</html>

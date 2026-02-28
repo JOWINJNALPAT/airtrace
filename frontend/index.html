@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="AirTrace — Track and recover lost luggage at the airport instantly. Search by flight number or claim ID.">
+  <title>AirTrace — Airport Luggage Tracking</title>
+  <!-- <meta name="api-base-url" content="https://your-backend.onrender.com"> -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Floating glow orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">
+        <div class="logo-icon">✈</div>
+        Air<span>Trace</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="search.html">Find Luggage</a></li>
+        <li class="nav-cta"><a href="staff-login.html">Staff Portal</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Live System &mdash; Updated in Real Time
+      </div>
+
+      <h1>Your Luggage,<br><span class="gradient-text">Located.</span></h1>
+
+      <p class="hero-subtitle">
+        Lost something at the airport? Enter your flight number or
+        claim reference and we'll track it down within seconds.
+      </p>
+
+      <!-- Quick Search Card -->
+      <div class="quick-search-card">
+        <div class="card-label">Quick Search</div>
+
+        <div class="form-group">
+          <label for="homeFlightNumber">Flight Number</label>
+          <input type="text" id="homeFlightNumber" placeholder="e.g., AI302 or BA123"
+            onkeypress="if(event.key==='Enter') searchFromHome()">
+        </div>
+
+        <div class="search-divider"><span>or</span></div>
+
+        <div class="form-group">
+          <label for="homeClaimId">Claim ID</label>
+          <input type="text" id="homeClaimId" placeholder="e.g., 1042"
+            onkeypress="if(event.key==='Enter') searchFromHome()">
+        </div>
+
+        <button onclick="searchFromHome()" class="btn btn-primary btn-full" style="margin-top:4px;">
+          Search Now &rarr;
+        </button>
+      </div>
+
+      <!-- Secondary Actions -->
+      <div class="hero-actions">
+        <a href="search.html" class="btn btn-secondary">Advanced Search</a>
+        <a href="staff-login.html" class="btn btn-secondary">Staff Portal</a>
+      </div>
+
+      <!-- Stats Strip -->
+      <div class="stats-strip">
+        <div class="stat-cell">
+          <div class="stat-number"><span class="stat-accent">98</span>%</div>
+          <div class="stat-label">Recovery Rate</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-number">&lt;<span class="stat-accent">24</span>h</div>
+          <div class="stat-label">Avg. Return Time</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-number"><span class="stat-accent">12K</span>+</div>
+          <div class="stat-label">Items Tracked</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-number"><span class="stat-accent">3</span></div>
+          <div class="stat-label">Terminals Covered</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="features">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">How It Works</div>
+        <h2>Three Steps to Reunite You<br>with Your Belongings</h2>
+        <p>Simple, fast, and handled by trained airport staff at every step of the process.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="step-badge">01</div>
+          <div class="feature-icon feature-icon-1">🎫</div>
+          <h3>Enter Your Details</h3>
+          <p>Type in your flight number or the claim ID from our lost & found desk. No account or registration needed.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="step-badge">02</div>
+          <div class="feature-icon feature-icon-2">📡</div>
+          <h3>Check Real-Time Status</h3>
+          <p>See exactly where your luggage is — found, stored, verified, or already waiting for collection at the
+            terminal.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="step-badge">03</div>
+          <div class="feature-icon feature-icon-3">✅</div>
+          <h3>Collect Your Item</h3>
+          <p>Visit the indicated baggage counter with your ID, or speak with our staff to arrange a pickup at your
+            convenience.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Banner -->
+  <section style="padding: 0 0 80px;">
+    <div class="container">
+      <div class="trust-banner">
+        <div class="trust-text">
+          <h2>Trusted by Thousands<br>of Travellers Every Year</h2>
+          <p>
+            AirTrace works directly with your airport's baggage handling and lost &amp; found teams to give you
+            real-time,
+            accurate information — no runaround, no waiting on hold.
+          </p>
+          <ul class="trust-features">
+            <li>Live database updated by airport staff</li>
+            <li>Search by flight number or claim reference</li>
+            <li>Covers all terminals at the airport</li>
+            <li>Available 7 days a week, 06:00 – 23:00</li>
+          </ul>
+        </div>
+        <div class="trust-cta">
+          <div class="trust-cta-big">98%</div>
+          <div class="trust-cta-label">of all registered items successfully returned</div>
+          <a href="search.html" class="btn btn-primary" style="margin-top:8px;">
+            Find My Luggage &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="info-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Get In Touch</div>
+        <h2>Need a Hand?</h2>
+        <p>Our lost &amp; found team is available 7 days a week and ready to help.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-icon-wrap">📞</div>
+          <h4>Phone</h4>
+          <p>+91 8765 432 109</p>
+          <span>Mon – Sun, 06:00 – 23:00</span>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon-wrap">✉️</div>
+          <h4>Email</h4>
+          <p>support@airtrace.co.in</p>
+          <span>Reply within 2 hours</span>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon-wrap">📍</div>
+          <h4>Lost &amp; Found Desk</h4>
+          <p>Terminal 1, Level B</p>
+          <span>Baggage Claim Area</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-logo">✈ AirTrace</div>
+      <p>&copy; 2026 AirTrace. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="search.html">Find Luggage</a>
+        <a href="staff-login.html">Staff</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
