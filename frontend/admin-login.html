@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login — AirTrace</title>
+    <meta name="api-base-url" content="https://airtrace1.onrender.com">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">✈</div>
+                Air<span>Trace</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="search.html">Find Luggage</a></li>
+                <li><a href="passenger-report.html">Report Lost</a></li>
+                <li class="nav-cta"><a href="admin-login.html" class="active">Admin Portal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container page-top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <section class="auth-section">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon">🛡️</div>
+                <h1>Admin Access</h1>
+                <p>Management & Claims Processing</p>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Admin Username</label>
+                <input type="text" id="username" placeholder="e.g. admin1"
+                    onkeypress="if(event.key==='Enter') adminLogin()">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••"
+                    onkeypress="if(event.key==='Enter') adminLogin()">
+            </div>
+
+            <button onclick="adminLogin()" class="btn btn-primary btn-full">
+                Sign In to Management &rarr;
+            </button>
+
+            <div id="loginError" class="error" style="display:none; margin-top:20px;"></div>
+            <div id="loginSuccess" class="success" style="display:none; margin-top:20px;"></div>
+
+            <div class="auth-footer">
+                Having trouble? Contact IT Support
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

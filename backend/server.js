@@ -86,7 +86,7 @@ app.get('/api/search-items', async (req, res) => {
         `;
         let params = [];
         let pIndex = 1;
-        if (flight_number) { query += ` AND i.flight_number = $${pIndex++}`; params.push(flight_number); }
+        if (flight_number) { query += ` AND UPPER(i.flight_number) = UPPER($${pIndex++})`; params.push(flight_number); }
         if (claim_id) { query += ` AND i.item_id IN (SELECT item_id FROM claim WHERE claim_id = $${pIndex++})`; params.push(claim_id); }
         if (passenger_id) { query += ` AND i.item_id IN (SELECT item_id FROM claim WHERE passenger_id = $${pIndex++})`; params.push(passenger_id); }
 

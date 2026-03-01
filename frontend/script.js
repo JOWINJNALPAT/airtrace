@@ -259,17 +259,37 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (navAuth) {
                 navAuth.textContent = `Logout (${staff.role})`;
-                navAuth.href = 'staff-login.html';
+                navAuth.href = staff.role === 'Admin' ? 'admin-login.html' : 'staff-login.html';
             }
             if (backBtn) {
-                backBtn.href = 'staff-login.html';
+                backBtn.href = staff.role === 'Admin' ? 'admin-login.html' : 'staff-login.html';
             }
 
-            if (pageHeader) pageHeader.textContent = 'Staff Dashboard';
-            if (pageDesc) pageDesc.textContent = 'Manage item registrations, passenger claims, and status updates.';
+            const claimPanel = document.getElementById('claimPanel');
+            const claimDivider = document.getElementById('claimDivider');
+            const updatePanel = document.getElementById('updatePanel');
+            const updateDivider = document.getElementById('updateDivider');
+            const registerPanel = document.getElementById('registerPanel');
 
-            // Load claims for processing
-            if (document.getElementById('claimsTableBody')) loadClaims();
+            if (staff.role !== 'Admin') {
+                // Staff Role: Only Register
+                if (claimPanel) claimPanel.style.display = 'none';
+                if (claimDivider) claimDivider.style.display = 'none';
+                if (updatePanel) updatePanel.style.display = 'none';
+                if (updateDivider) updateDivider.style.display = 'none';
+
+                if (pageHeader) pageHeader.textContent = 'Staff Registration Portal';
+                if (pageDesc) pageDesc.textContent = 'Operational View: Register newly found baggage items.';
+            } else {
+                // Admin Role: Claims & Updates
+                if (registerPanel) registerPanel.style.display = 'none';
+
+                if (pageHeader) pageHeader.textContent = 'Admin Management Dashboard';
+                if (pageDesc) pageDesc.textContent = 'Management View: Review passenger claims and update item statuses.';
+
+                // Load claims for processing
+                if (document.getElementById('claimsTableBody')) loadClaims();
+            }
         } catch (e) {
             console.error('Error parsing staff data', e);
         }
@@ -360,11 +380,11 @@ function updateItemStatus() {
 }
 
 // ============================================
-// 4. STAFF PORTAL LOGIN
+// 4. STAFF LOGIN FUNCTION (Standard Staff)
 // ============================================
 function staffLogin() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+    const username = document.getElementById('username')?.value?.trim();
+    const password = document.getElementById('password')?.value?.trim();
 
     if (!username || !password) {
         showError('loginError', 'Please enter username and password!');
@@ -378,19 +398,58 @@ function staffLogin() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                showSuccess('loginSuccess', `✅ Login successful! Welcome ${data.staff.username}.`);
+            if (data.success && data.staff.role === 'Staff') {
+                showSuccess('loginSuccess', '✅ Staff login successful! Redirecting...');
                 localStorage.setItem('staff', JSON.stringify(data.staff));
                 setTimeout(() => {
                     window.location.href = 'add-luggage.html';
-                }, 1500);
+                }, 2000);
+            } else if (data.success && data.staff.role === 'Admin') {
+                showError('loginError', '❌ Admins must use the Admin Portal.');
             } else {
-                showError('loginError', '❌ Invalid username or password!');
+                showError('loginError', '❌ Invalid staff credentials!');
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('loginError', '❌ Error connecting to server!');
+        .catch(err => {
+            console.error(err);
+            showError('loginError', '❌ Connection error!');
+        });
+}
+
+// ============================================
+// 4b. ADMIN LOGIN FUNCTION
+// ============================================
+function adminLogin() {
+    const username = document.getElementById('username')?.value?.trim();
+    const password = document.getElementById('password')?.value?.trim();
+
+    if (!username || !password) {
+        showError('loginError', 'Please enter username and password!');
+        return;
+    }
+
+    fetch(`${API_URL}/staff-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.staff.role === 'Admin') {
+                showSuccess('loginSuccess', '✅ Admin login successful! Redirecting...');
+                localStorage.setItem('staff', JSON.stringify(data.staff));
+                setTimeout(() => {
+                    window.location.href = 'add-luggage.html';
+                }, 2000);
+            } else if (data.success && data.staff.role === 'Staff') {
+                showError('loginError', '❌ Staff must use the Staff Portal.');
+            } else {
+                showError('loginError', '❌ Invalid admin credentials!');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showError('loginError', '❌ Connection error!');
         });
 }
 
