@@ -145,8 +145,8 @@ INSERT INTO location (terminal_code, zone_type, specific_spot) VALUES
 
 -- Sample Staff
 INSERT INTO staff (username, password, role, employee_id) VALUES 
-('staff1', 'password123', 'Staff', 'EMP000'),
-('admin1', 'password123', 'Admin', 'EMP001'),
+('staff1', 'staff123', 'Staff', 'EMP000'),
+('admin1', 'admin123', 'Admin', 'EMP001'),
 ('staff2', 'staff123', 'Staff', 'EMP002'),
 ('staff3', 'staff123', 'Staff', 'EMP003');
 
