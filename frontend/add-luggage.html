@@ -44,8 +44,47 @@
         <div class="container">
 
             <div class="page-header">
-                <h2>Staff Dashboard</h2>
-                <p>Register found items, create passenger claims, and update item statuses.</p>
+                <h2 id="dashboardTitle">Dashboard</h2>
+                <p id="dashboardSubtitle">Welcome to the AirTrace management interface.</p>
+            </div>
+
+            <!-- Admin Overview Stats -->
+            <div id="adminOverview" style="display: none; margin-bottom: 40px;">
+                <div class="stats-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div class="stat-card"
+                        style="background: var(--glass-1); border: 1px solid var(--glass-border-1); padding: 24px; border-radius: var(--r-lg); text-align: center;">
+                        <div
+                            style="font-size: 11px; text-transform: uppercase; color: var(--text-500); letter-spacing: 0.1em; margin-bottom: 8px;">
+                            Total Found</div>
+                        <div id="statTotalFound" style="font-size: 32px; font-weight: 800; color: var(--sky-400);">0
+                        </div>
+                    </div>
+                    <div class="stat-card"
+                        style="background: var(--glass-1); border: 1px solid var(--glass-border-1); padding: 24px; border-radius: var(--r-lg); text-align: center;">
+                        <div
+                            style="font-size: 11px; text-transform: uppercase; color: var(--text-500); letter-spacing: 0.1em; margin-bottom: 8px;">
+                            Pending Claims</div>
+                        <div id="statPendingClaims" style="font-size: 32px; font-weight: 800; color: var(--amber-400);">
+                            0</div>
+                    </div>
+                    <div class="stat-card"
+                        style="background: var(--glass-1); border: 1px solid var(--glass-border-1); padding: 24px; border-radius: var(--r-lg); text-align: center;">
+                        <div
+                            style="font-size: 11px; text-transform: uppercase; color: var(--text-500); letter-spacing: 0.1em; margin-bottom: 8px;">
+                            Verified Proofs</div>
+                        <div id="statVerified" style="font-size: 32px; font-weight: 800; color: var(--green-400);">0
+                        </div>
+                    </div>
+                    <div class="stat-card"
+                        style="background: var(--glass-1); border: 1px solid var(--glass-border-1); padding: 24px; border-radius: var(--r-lg); text-align: center;">
+                        <div
+                            style="font-size: 11px; text-transform: uppercase; color: var(--text-500); letter-spacing: 0.1em; margin-bottom: 8px;">
+                            Active Flights</div>
+                        <div id="statFlights" style="font-size: 32px; font-weight: 800; color: var(--violet-400);">4
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 1. Register Found Item -->

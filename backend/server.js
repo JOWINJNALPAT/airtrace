@@ -243,6 +243,26 @@ app.post('/api/passenger-report', async (req, res) => {
     }
 });
 
+// DASHBOARD STATS (For Admin Overview)
+app.get('/api/stats', async (req, res) => {
+    try {
+        const itemRes = await db.query("SELECT COUNT(*) FROM item WHERE status = 'Found'");
+        const claimRes = await db.query("SELECT COUNT(*) FROM claim WHERE status = 'Pending'");
+        const verifiedRes = await db.query("SELECT COUNT(*) FROM claim WHERE status = 'Verified'");
+        const flightRes = await db.query("SELECT COUNT(*) FROM flight");
+
+        res.json({
+            success: true,
+            totalFound: itemRes.rows[0].count,
+            pendingClaims: claimRes.rows[0].count,
+            verified: verifiedRes.rows[0].count,
+            flights: flightRes.rows[0].count
+        });
+    } catch (err) {
+        res.json({ success: false, message: err.message });
+    }
+});
+
 // GET ALL CLAIMS (For Staff)
 app.get('/api/claims', async (req, res) => {
     try {

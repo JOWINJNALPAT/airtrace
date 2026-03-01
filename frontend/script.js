@@ -270,6 +270,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const updatePanel = document.getElementById('updatePanel');
             const updateDivider = document.getElementById('updateDivider');
             const registerPanel = document.getElementById('registerPanel');
+            const adminOverview = document.getElementById('adminOverview');
 
             if (staff.role !== 'Admin') {
                 // Staff Role: Only Register
@@ -277,17 +278,20 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (claimDivider) claimDivider.style.display = 'none';
                 if (updatePanel) updatePanel.style.display = 'none';
                 if (updateDivider) updateDivider.style.display = 'none';
+                if (adminOverview) adminOverview.style.display = 'none';
 
-                if (pageHeader) pageHeader.textContent = 'Staff Registration Portal';
+                if (pageHeader) pageHeader.innerHTML = '<h2>Operational Console</h2>';
                 if (pageDesc) pageDesc.textContent = 'Operational View: Register newly found baggage items.';
             } else {
-                // Admin Role: Claims & Updates
+                // Admin Role: Claims & Updates + Stats
                 if (registerPanel) registerPanel.style.display = 'none';
+                if (adminOverview) adminOverview.style.display = 'block';
 
-                if (pageHeader) pageHeader.textContent = 'Admin Management Dashboard';
-                if (pageDesc) pageDesc.textContent = 'Management View: Review passenger claims and update item statuses.';
+                if (pageHeader) pageHeader.innerHTML = '<h2>Management Console</h2>';
+                if (pageDesc) pageDesc.textContent = 'Strategic View: Review passenger claims, track fleet logistics, and verify items.';
 
-                // Load claims for processing
+                // Load components
+                loadStats();
                 if (document.getElementById('claimsTableBody')) loadClaims();
             }
         } catch (e) {
@@ -295,6 +299,20 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+function loadStats() {
+    fetch(`${API_URL}/stats`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (document.getElementById('statTotalFound')) document.getElementById('statTotalFound').textContent = data.totalFound;
+                if (document.getElementById('statPendingClaims')) document.getElementById('statPendingClaims').textContent = data.pendingClaims;
+                if (document.getElementById('statVerified')) document.getElementById('statVerified').textContent = data.verified;
+                if (document.getElementById('statFlights')) document.getElementById('statFlights').textContent = data.flights;
+            }
+        })
+        .catch(err => console.error('Error loading stats:', err));
+}
 
 // ============================================
 // 3. LOAD AND PROCESS CLAIMS
@@ -314,13 +332,21 @@ function loadClaims() {
 
                 tableBody.innerHTML = data.claims.map(c => `
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 10px 8px;">#C-${c.claim_id}</td>
-                        <td style="padding: 10px 8px;">${c.first_name} ${c.last_name}</td>
-                        <td style="padding: 10px 8px;">${c.item_name} <br> <small style="opacity:0.6">Item ID: ${c.item_id}</small></td>
-                        <td style="padding: 10px 8px; font-size: 0.85em; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.proof_of_ownership || '—'}</td>
-                        <td style="padding: 10px 8px;"><span class="status-badge" style="padding: 2px 6px; font-size: 0.8em; background: rgba(255,193,7,0.2); color: #ffc107;">${c.status}</span></td>
-                        <td style="padding: 10px 8px;">
-                            <button onclick="prepareProcess(${c.item_id}, '${c.status}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8em;">Process</button>
+                        <td style="padding: 16px 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--sky-400);">#C-${c.claim_id}</td>
+                        <td style="padding: 16px 8px;">
+                            <div style="font-weight: 600; color: var(--white);">${c.first_name} ${c.last_name}</div>
+                            <div style="font-size: 11px; color: var(--text-500); margin-top: 2px;">Passenger ID: ${c.passenger_id}</div>
+                        </td>
+                        <td style="padding: 16px 8px;">
+                            <div style="font-weight: 600;">${c.item_name}</div>
+                            <div style="font-size: 11px; color: var(--text-500); margin-top: 2px;">Item ID: ${c.item_id} • ${c.item_status}</div>
+                        </td>
+                        <td style="padding: 16px 8px; font-size: 0.85em; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-300);">${c.proof_of_ownership || '<span style="opacity:0.3">No proof provided</span>'}</td>
+                        <td style="padding: 16px 8px;">
+                            <span class="status-badge ${c.status.toLowerCase()}" style="font-size: 9px; padding: 3px 8px;">${c.status}</span>
+                        </td>
+                        <td style="padding: 16px 8px;">
+                            <button onclick="prepareProcess(${c.item_id}, '${c.status}')" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8em; border-radius: 6px;">Process</button>
                         </td>
                     </tr>
                 `).join('');
@@ -368,6 +394,7 @@ function updateItemStatus() {
             if (data.success) {
                 showSuccess('updateMessage', `✅ Status updated for Item #${itemId}`);
                 if (document.getElementById('claimsTableBody')) loadClaims();
+                loadStats(); // Refresh stats
                 clearForm();
             } else {
                 showError('updateError', '❌ ' + (data.message || 'Error updating status'));

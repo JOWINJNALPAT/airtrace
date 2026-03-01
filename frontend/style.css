@@ -1587,3 +1587,32 @@ textarea {
     position: relative;
     z-index: 2;
 }
+
+/* ================================================
+   ADMIN DASHBOARD OVERVIEW
+   ================================================ */
+.stats-grid {
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    transition: transform var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(14, 165, 233, 0.3);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card div:last-child {
+    text-shadow: 0 0 20px currentColor;
+}
+
+#claimsTableBody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+#claimsTableBody td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
