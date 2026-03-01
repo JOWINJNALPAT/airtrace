@@ -239,17 +239,28 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('categoryId')) loadCategories();
     if (document.getElementById('flightNumber')) loadFlights();
     if (document.getElementById('locationId')) loadLocations();
-
     // Role-based access control for dashboard
     const staffData = localStorage.getItem('staff');
     if (staffData && document.getElementById('claimPanel')) {
         try {
             const staff = JSON.parse(staffData);
+            const pageHeader = document.querySelector('.page-header h2');
+            const pageDesc = document.querySelector('.page-header p');
+            const navAuth = document.querySelector('.nav-cta a');
+
+            if (navAuth) navAuth.textContent = `Logout (${staff.role})`;
+
             if (staff.role !== 'Admin') {
                 const claimPanel = document.getElementById('claimPanel');
                 const claimDivider = document.getElementById('claimDivider');
                 if (claimPanel) claimPanel.style.display = 'none';
                 if (claimDivider) claimDivider.style.display = 'none';
+
+                if (pageHeader) pageHeader.textContent = 'Desk Staff Dashboard';
+                if (pageDesc) pageDesc.textContent = 'Restricted View: Register found items and update item statuses only.';
+            } else {
+                if (pageHeader) pageHeader.textContent = 'Admin Management Dashboard';
+                if (pageDesc) pageDesc.textContent = 'Full Access: Register items, manage passenger claims, and oversee operations.';
             }
         } catch (e) {
             console.error('Error parsing staff data', e);
