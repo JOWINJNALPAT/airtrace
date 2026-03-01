@@ -267,6 +267,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (pageHeader) pageHeader.textContent = 'Staff Dashboard';
             if (pageDesc) pageDesc.textContent = 'Manage item registrations, passenger claims, and status updates.';
+
+            // Load claims for processing
+            if (document.getElementById('claimsTableBody')) loadClaims();
         } catch (e) {
             console.error('Error parsing staff data', e);
         }
@@ -274,50 +277,49 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 3. CREATE CLAIM FOR ITEM
+// 3. LOAD AND PROCESS CLAIMS
 // ============================================
-function createClaim() {
-    const passengerId = document.getElementById('passengerId')?.value?.trim();
-    const itemId = document.getElementById('itemId')?.value?.trim();
-    const proofOfOwnership = document.getElementById('proofOfOwnership')?.value?.trim();
+function loadClaims() {
+    const tableBody = document.getElementById('claimsTableBody');
+    if (!tableBody) return;
 
-    if (!passengerId || !itemId) {
-        showError('claimError', '⚠️ Please fill in passenger ID and item ID!');
-        return;
-    }
-
-    let staffId = null;
-    try {
-        const staffData = localStorage.getItem('staff');
-        if (staffData) staffId = JSON.parse(staffData).staff_id;
-    } catch (e) { }
-
-    const claimData = {
-        passenger_id: parseInt(passengerId),
-        item_id: parseInt(itemId),
-        status: 'Pending',
-        proof_of_ownership: proofOfOwnership || null,
-        processed_by_staff_id: staffId
-    };
-
-    fetch(`${API_URL}/create-claim`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(claimData)
-    })
-        .then(response => response.json())
+    fetch(`${API_URL}/claims`)
+        .then(r => r.json())
         .then(data => {
             if (data.success) {
-                showSuccess('claimMessage', '✅ Claim created successfully! (Claim ID: ' + data.claim_id + ')');
-                clearForm();
-            } else {
-                showError('claimError', '❌ ' + (data.message || 'Error creating claim'));
+                if (data.claims.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; opacity: 0.5;">No pending claims found.</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = data.claims.map(c => `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 8px;">#C-${c.claim_id}</td>
+                        <td style="padding: 10px 8px;">${c.first_name} ${c.last_name}</td>
+                        <td style="padding: 10px 8px;">${c.item_name} <br> <small style="opacity:0.6">Item ID: ${c.item_id}</small></td>
+                        <td style="padding: 10px 8px; font-size: 0.85em; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.proof_of_ownership || '—'}</td>
+                        <td style="padding: 10px 8px;"><span class="status-badge" style="padding: 2px 6px; font-size: 0.8em; background: rgba(255,193,7,0.2); color: #ffc107;">${c.status}</span></td>
+                        <td style="padding: 10px 8px;">
+                            <button onclick="prepareProcess(${c.item_id}, '${c.status}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8em;">Process</button>
+                        </td>
+                    </tr>
+                `).join('');
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('claimError', '❌ Error connecting to server!');
-        });
+        .catch(err => console.error('Error loading claims:', err));
+}
+
+function prepareProcess(itemId, currentStatus) {
+    document.getElementById('updateItemId').value = itemId;
+    document.getElementById('updateStatus').value = currentStatus === 'Pending' ? 'Verified' : currentStatus;
+
+    // Smooth scroll to update panel
+    document.getElementById('updatePanel').scrollIntoView({ behavior: 'smooth' });
+
+    // Highlight the panel
+    const panel = document.getElementById('updatePanel');
+    panel.style.boxShadow = '0 0 20px rgba(0, 210, 255, 0.4)';
+    setTimeout(() => { panel.style.boxShadow = ''; }, 2000);
 }
 
 // ============================================
@@ -344,7 +346,9 @@ function updateItemStatus() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showSuccess('updateMessage', '✅ Item status updated successfully!');
+                showSuccess('updateMessage', `✅ Status updated for Item #${itemId}`);
+                if (document.getElementById('claimsTableBody')) loadClaims();
+                clearForm();
             } else {
                 showError('updateError', '❌ ' + (data.message || 'Error updating status'));
             }
@@ -356,7 +360,7 @@ function updateItemStatus() {
 }
 
 // ============================================
-// 4. STAFF LOGIN FUNCTION
+// 4. STAFF PORTAL LOGIN
 // ============================================
 function staffLogin() {
     const username = document.getElementById('username').value.trim();
@@ -374,53 +378,14 @@ function staffLogin() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.staff.role === 'Staff') {
-                showSuccess('loginSuccess', '✅ Login successful! Redirecting...');
+            if (data.success) {
+                showSuccess('loginSuccess', `✅ Login successful! Welcome ${data.staff.username}.`);
                 localStorage.setItem('staff', JSON.stringify(data.staff));
                 setTimeout(() => {
                     window.location.href = 'add-luggage.html';
-                }, 2000);
-            } else if (data.success && data.staff.role === 'Admin') {
-                showError('loginError', '❌ Admins must log in through the Admin Portal.');
+                }, 1500);
             } else {
                 showError('loginError', '❌ Invalid username or password!');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('loginError', '❌ Error connecting to server!');
-        });
-}
-
-// ============================================
-// 4b. ADMIN LOGIN FUNCTION
-// ============================================
-function adminLogin() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    if (!username || !password) {
-        showError('loginError', 'Please enter username and password!');
-        return;
-    }
-
-    fetch(`${API_URL}/staff-login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.staff.role === 'Admin') {
-                showSuccess('loginSuccess', '✅ Admin login successful! Redirecting...');
-                localStorage.setItem('staff', JSON.stringify(data.staff));
-                setTimeout(() => {
-                    window.location.href = 'add-luggage.html';
-                }, 2000);
-            } else if (data.success && data.staff.role === 'Staff') {
-                showError('loginError', '❌ Access Denied. Standard staff must use the Staff Portal.');
-            } else {
-                showError('loginError', '❌ Invalid admin credentials!');
             }
         })
         .catch(error => {

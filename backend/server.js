@@ -243,6 +243,23 @@ app.post('/api/passenger-report', async (req, res) => {
     }
 });
 
+// GET ALL CLAIMS (For Staff)
+app.get('/api/claims', async (req, res) => {
+    try {
+        const { rows } = await db.query(`
+            SELECT c.*, p.first_name, p.last_name, i.item_name, i.status as item_status
+            FROM claim c
+            JOIN passenger p ON c.passenger_id = p.passenger_id
+            JOIN item i ON c.item_id = i.item_id
+            ORDER BY c.claim_date DESC
+            LIMIT 50
+        `);
+        res.json({ success: true, claims: rows });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error: ' + error.message });
+    }
+});
+
 // START SERVER
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

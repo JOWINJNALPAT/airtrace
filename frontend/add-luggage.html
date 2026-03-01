@@ -115,36 +115,40 @@
 
             <div class="section-divider" id="claimDivider"><span>Claim Management</span></div>
 
-            <!-- 2. Create Claim -->
+            <div class="section-divider" id="claimDivider"><span>Processing Claims</span></div>
+
+            <!-- 2. Process Claims -->
             <div class="panel" id="claimPanel">
                 <h3>
-                    <div class="panel-icon">📋</div>
-                    Create Passenger Claim
+                    <div class="panel-icon">⚖️</div>
+                    Review & Process Claims
                 </h3>
+                <p style="margin-bottom: 20px; font-size: 0.9em; opacity: 0.8;">Below are the latest claims filed by
+                    passengers. Review the details and update the status if verified.</p>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="passengerId">Passenger ID</label>
-                        <input type="number" id="passengerId" placeholder="e.g., 7">
-                    </div>
-                    <div class="form-group">
-                        <label for="itemId">Item ID</label>
-                        <input type="number" id="itemId" placeholder="e.g., 23">
-                    </div>
+                <div class="table-container" style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <th style="padding: 12px 8px;">Claim ID</th>
+                                <th style="padding: 12px 8px;">Passenger</th>
+                                <th style="padding: 12px 8px;">Item</th>
+                                <th style="padding: 12px 8px;">Proof</th>
+                                <th style="padding: 12px 8px;">Status</th>
+                                <th style="padding: 12px 8px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="claimsTableBody">
+                            <tr>
+                                <td colspan="6" style="padding: 20px; text-align: center; opacity: 0.5;">Loading pending
+                                    claims...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="form-group">
-                    <label for="proofOfOwnership">Proof of Ownership</label>
-                    <textarea id="proofOfOwnership" rows="3"
-                        placeholder="Boarding pass, receipt number, photo ID detail…"></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button onclick="createClaim()" class="btn btn-primary">File Claim</button>
-                    <button onclick="clearForm()" class="btn btn-secondary">Clear</button>
-                </div>
-                <div id="claimMessage" class="success" style="display:none;"></div>
-                <div id="claimError" class="error" style="display:none;"></div>
+                <div id="claimMessage" class="success" style="display:none; margin-top: 15px;"></div>
+                <div id="claimError" class="error" style="display:none; margin-top: 15px;"></div>
             </div>
 
             <div class="section-divider" id="updateDivider"><span>Status Updates</span></div>
