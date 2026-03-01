@@ -247,8 +247,15 @@ window.addEventListener('DOMContentLoaded', () => {
             const pageHeader = document.querySelector('.page-header h2');
             const pageDesc = document.querySelector('.page-header p');
             const navAuth = document.querySelector('.nav-cta a');
+            const backBtn = document.getElementById('dashboardBackBtn');
 
-            if (navAuth) navAuth.textContent = `Logout (${staff.role})`;
+            if (navAuth) {
+                navAuth.textContent = `Logout (${staff.role})`;
+                navAuth.href = staff.role === 'Admin' ? 'admin-login.html' : 'staff-login.html';
+            }
+            if (backBtn) {
+                backBtn.href = staff.role === 'Admin' ? 'admin-login.html' : 'staff-login.html';
+            }
 
             if (staff.role !== 'Admin') {
                 const claimPanel = document.getElementById('claimPanel');
@@ -362,14 +369,53 @@ function staffLogin() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.success && data.staff.role === 'Staff') {
                 showSuccess('loginSuccess', '✅ Login successful! Redirecting...');
                 localStorage.setItem('staff', JSON.stringify(data.staff));
                 setTimeout(() => {
                     window.location.href = 'add-luggage.html';
                 }, 2000);
+            } else if (data.success && data.staff.role === 'Admin') {
+                showError('loginError', '❌ Admins must log in through the Admin Portal.');
             } else {
                 showError('loginError', '❌ Invalid username or password!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('loginError', '❌ Error connecting to server!');
+        });
+}
+
+// ============================================
+// 4b. ADMIN LOGIN FUNCTION
+// ============================================
+function adminLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!username || !password) {
+        showError('loginError', 'Please enter username and password!');
+        return;
+    }
+
+    fetch(`${API_URL}/staff-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.staff.role === 'Admin') {
+                showSuccess('loginSuccess', '✅ Admin login successful! Redirecting...');
+                localStorage.setItem('staff', JSON.stringify(data.staff));
+                setTimeout(() => {
+                    window.location.href = 'add-luggage.html';
+                }, 2000);
+            } else if (data.success && data.staff.role === 'Staff') {
+                showError('loginError', '❌ Access Denied. Standard staff must use the Staff Portal.');
+            } else {
+                showError('loginError', '❌ Invalid admin credentials!');
             }
         })
         .catch(error => {
