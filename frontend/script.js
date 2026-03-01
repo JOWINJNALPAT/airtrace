@@ -153,19 +153,19 @@ function addItem() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(itemData)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSuccess('addMessage', '✅ Item added successfully! (ID: ' + data.id + ')');
-            clearForm();
-        } else {
-            showError('addError', '❌ ' + (data.message || 'Error adding item'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError('addError', '❌ Error connecting to server. Make sure backend is running!');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('addMessage', '✅ Item added successfully! (ID: ' + data.id + ')');
+                clearForm();
+            } else {
+                showError('addError', '❌ ' + (data.message || 'Error adding item'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('addError', '❌ Error connecting to server. Make sure backend is running!');
+        });
 }
 
 // ============================================
@@ -239,6 +239,22 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('categoryId')) loadCategories();
     if (document.getElementById('flightNumber')) loadFlights();
     if (document.getElementById('locationId')) loadLocations();
+
+    // Role-based access control for dashboard
+    const staffData = localStorage.getItem('staff');
+    if (staffData && document.getElementById('claimPanel')) {
+        try {
+            const staff = JSON.parse(staffData);
+            if (staff.role !== 'Admin') {
+                const claimPanel = document.getElementById('claimPanel');
+                const claimDivider = document.getElementById('claimDivider');
+                if (claimPanel) claimPanel.style.display = 'none';
+                if (claimDivider) claimDivider.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('Error parsing staff data', e);
+        }
+    }
 });
 
 // ============================================
@@ -266,19 +282,19 @@ function createClaim() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(claimData)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSuccess('claimMessage', '✅ Claim created successfully! (Claim ID: ' + data.claim_id + ')');
-            clearForm();
-        } else {
-            showError('claimError', '❌ ' + (data.message || 'Error creating claim'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError('claimError', '❌ Error connecting to server!');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('claimMessage', '✅ Claim created successfully! (Claim ID: ' + data.claim_id + ')');
+                clearForm();
+            } else {
+                showError('claimError', '❌ ' + (data.message || 'Error creating claim'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('claimError', '❌ Error connecting to server!');
+        });
 }
 
 // ============================================
@@ -302,18 +318,18 @@ function updateItemStatus() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSuccess('updateMessage', '✅ Item status updated successfully!');
-        } else {
-            showError('updateError', '❌ ' + (data.message || 'Error updating status'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError('updateError', '❌ Error connecting to server!');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('updateMessage', '✅ Item status updated successfully!');
+            } else {
+                showError('updateError', '❌ ' + (data.message || 'Error updating status'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('updateError', '❌ Error connecting to server!');
+        });
 }
 
 // ============================================
@@ -333,33 +349,33 @@ function staffLogin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSuccess('loginSuccess', '✅ Login successful! Redirecting...');
-            localStorage.setItem('staff', JSON.stringify(data.staff));
-            setTimeout(() => {
-                window.location.href = 'add-luggage.html';
-            }, 2000);
-        } else {
-            showError('loginError', '❌ Invalid username or password!');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError('loginError', '❌ Error connecting to server!');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('loginSuccess', '✅ Login successful! Redirecting...');
+                localStorage.setItem('staff', JSON.stringify(data.staff));
+                setTimeout(() => {
+                    window.location.href = 'add-luggage.html';
+                }, 2000);
+            } else {
+                showError('loginError', '❌ Invalid username or password!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('loginError', '❌ Error connecting to server!');
+        });
 }
 
 // ============================================
 // 5. CLEAR FORM (Reset form fields)
 // ============================================
 function clearForm() {
-    const formElements = ['flightNumber', 'itemName', 'itemDescription', 'serialNumber', 
-                         'categoryId', 'locationId', 'itemStatus', 'passengerId', 'itemId', 
-                         'proofOfOwnership', 'ticketNum', 'passengerName', 'luggageColor', 
-                         'luggageSize', 'luggageDescription', 'luggageStatus'];
-    
+    const formElements = ['flightNumber', 'itemName', 'itemDescription', 'serialNumber',
+        'categoryId', 'locationId', 'itemStatus', 'passengerId', 'itemId',
+        'proofOfOwnership', 'ticketNum', 'passengerName', 'luggageColor',
+        'luggageSize', 'luggageDescription', 'luggageStatus'];
+
     formElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.value = '';
@@ -397,10 +413,10 @@ function showSuccess(elementId, message) {
 // ============================================
 // KEYBOARD SHORTCUTS
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const flightInput = document.getElementById('flightNumber');
     if (flightInput) {
-        flightInput.addEventListener('keypress', function(event) {
+        flightInput.addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 searchItems();
             }

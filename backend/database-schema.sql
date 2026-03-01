@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS staff (
     staff_id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(10) CHECK (role IN ('Admin', 'Desk')) NOT NULL DEFAULT 'Desk',
+    role VARCHAR(10) CHECK (role IN ('Admin', 'Staff')) NOT NULL DEFAULT 'Staff',
     employee_id VARCHAR(50) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -145,10 +145,10 @@ INSERT INTO location (terminal_code, zone_type, specific_spot) VALUES
 
 -- Sample Staff
 INSERT INTO staff (username, password, role, employee_id) VALUES 
-('staff1', 'password123', 'Desk', 'EMP000'),
+('staff1', 'password123', 'Staff', 'EMP000'),
 ('admin1', 'password123', 'Admin', 'EMP001'),
-('desk1', 'desk123', 'Desk', 'EMP002'),
-('desk2', 'desk123', 'Desk', 'EMP003');
+('staff2', 'staff123', 'Staff', 'EMP002'),
+('staff3', 'staff123', 'Staff', 'EMP003');
 
 -- Sample Passengers
 INSERT INTO passenger (first_name, last_name, phone_number, email, passport_number) VALUES 
