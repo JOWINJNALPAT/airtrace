@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS item (
     location_id INT,
     flight_number VARCHAR(20),
     category_id INT NOT NULL,
+    passenger_id INT,
     registered_by_staff_id INT,
     item_name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -96,6 +97,7 @@ CREATE TABLE IF NOT EXISTS item (
     FOREIGN KEY (location_id) REFERENCES location(location_id),
     FOREIGN KEY (flight_number) REFERENCES flight(flight_number),
     FOREIGN KEY (category_id) REFERENCES category(category_id),
+    FOREIGN KEY (passenger_id) REFERENCES passenger(passenger_id),
     FOREIGN KEY (registered_by_staff_id) REFERENCES staff(staff_id)
 );
 

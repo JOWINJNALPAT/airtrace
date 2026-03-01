@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Report your lost luggage to AirTrace. Fill in your details and flight info to help us find your items.">
+    <title>Report Lost Item — AirTrace</title>
+    <meta name="api-base-url" content="https://airtrace1.onrender.com">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">✈</div>
+                Air<span>Trace</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="search.html">Track Item</a></li>
+                <li class="nav-cta"><a href="passenger-report.html" class="active">Report Lost Item</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Back Button -->
+    <div class="container page-top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h2>Report Lost Item</h2>
+                <p>Please provide your contact details and information about your lost item. Our staff will use this to
+                    match with found items.</p>
+            </div>
+
+            <div class="panel">
+                <h3>
+                    <div class="panel-icon">👤</div> Contact Information
+                </h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="p-firstName">First Name *</label>
+                        <input type="text" id="p-firstName" placeholder="e.g. John">
+                    </div>
+                    <div class="form-group">
+                        <label for="p-lastName">Last Name *</label>
+                        <input type="text" id="p-lastName" placeholder="e.g. Smith">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="p-email">Email Address *</label>
+                        <input type="email" id="p-email" placeholder="e.g. john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="p-phone">Phone Number</label>
+                        <input type="tel" id="p-phone" placeholder="e.g. +1 234 567 890">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="p-passport">Passport / ID Number</label>
+                    <input type="text" id="p-passport" placeholder="e.g. A1234567">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>
+                    <div class="panel-icon">📦</div> Item & Flight Details
+                </h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="p-flightNumber">Flight Number *</label>
+                        <select id="p-flightNumber">
+                            <option value="">Select your flight...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="p-categoryId">Item Category *</label>
+                        <select id="p-categoryId">
+                            <option value="">Select category...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="p-itemName">Item Name *</label>
+                    <input type="text" id="p-itemName" placeholder="e.g. Black Sony Camera, Blue Samsonite Suitcase">
+                </div>
+
+                <div class="form-group">
+                    <label for="p-description">Detailed Description</label>
+                    <textarea id="p-description" rows="4"
+                        placeholder="Mention any distinguishing marks, brands, or color details..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="p-serial">Serial Number (if any)</label>
+                    <input type="text" id="p-serial" placeholder="e.g. SN-987654">
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="reportLostItem()" class="btn btn-primary">Submit Report</button>
+                    <button onclick="window.location.reload()" class="btn btn-secondary">Reset Form</button>
+                </div>
+
+                <div id="reportMessage" class="success" style="display:none;"></div>
+                <div id="reportError" class="error" style="display:none;"></div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        // Specific init for this page
+        window.addEventListener('DOMContentLoaded', () => {
+            // Re-use logic from script.js to load categories and flights
+            loadCategoriesOnElement('p-categoryId');
+            loadFlightsOnElement('p-flightNumber');
+        });
+
+        function loadCategoriesOnElement(id) {
+            fetch(`${API_URL}/categories`)
+                .then(r => r.json())
+                .then(data => {
+                    const select = document.getElementById(id);
+                    if (data.success && select) {
+                        data.categories.forEach(cat => {
+                            const opt = document.createElement('option');
+                            opt.value = cat.category_id;
+                            opt.textContent = cat.category_name;
+                            select.appendChild(opt);
+                        });
+                    }
+                });
+        }
+
+        function loadFlightsOnElement(id) {
+            fetch(`${API_URL}/flights`)
+                .then(r => r.json())
+                .then(data => {
+                    const select = document.getElementById(id);
+                    if (data.success && select) {
+                        data.flights.forEach(f => {
+                            const opt = document.createElement('option');
+                            opt.value = f.flight_number;
+                            opt.textContent = `${f.flight_number} - ${f.airline_name}`;
+                            select.appendChild(opt);
+                        });
+                    }
+                });
+        }
+    </script>
+</body>
+
+</html>

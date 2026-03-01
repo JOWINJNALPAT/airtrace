@@ -69,6 +69,7 @@ function displayItems(items) {
             ? `${item.terminal_code || ''} — ${item.specific_spot}`
             : (item.terminal_code || '—');
         const statusClass = (item.status || 'lost').toLowerCase();
+        const displayStatus = item.status === 'Found' ? `Founded at ${item.terminal_code || ''}` : item.status;
         const itemHTML = `
             <div class="item-card" style="animation-delay: ${idx * 0.06}s">
                 <div class="item-card-header">
@@ -76,7 +77,7 @@ function displayItems(items) {
                         <div class="item-card-title">${item.item_name}</div>
                         <div class="item-card-sub">Item ID: #${item.item_id} &nbsp;·&nbsp; ${item.category_name || 'Uncategorised'}</div>
                     </div>
-                    <span class="status-badge ${statusClass}">${item.status}</span>
+                    <span class="status-badge ${statusClass}">${displayStatus}</span>
                 </div>
                 <div class="item-card-body">
                     <div class="item-field">
@@ -502,3 +503,56 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// ============================================
+// 6. PASSENGER REPORT LOST ITEM
+// ============================================
+function reportLostItem() {
+    const firstName = document.getElementById('p-firstName')?.value?.trim();
+    const lastName = document.getElementById('p-lastName')?.value?.trim();
+    const email = document.getElementById('p-email')?.value?.trim();
+    const phone = document.getElementById('p-phone')?.value?.trim();
+    const passport = document.getElementById('p-passport')?.value?.trim();
+    const flightNumber = document.getElementById('p-flightNumber')?.value;
+    const categoryId = document.getElementById('p-categoryId')?.value;
+    const itemName = document.getElementById('p-itemName')?.value?.trim();
+    const description = document.getElementById('p-description')?.value?.trim();
+    const serial = document.getElementById('p-serial')?.value?.trim();
+
+    if (!firstName || !lastName || !email || !flightNumber || !itemName || !categoryId) {
+        showError('reportError', '⚠️ Please fill in all required fields marked with *');
+        return;
+    }
+
+    const data = {
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone_number: phone,
+        passport_number: passport,
+        flight_number: flightNumber,
+        category_id: parseInt(categoryId),
+        item_name: itemName,
+        description: description,
+        serial_number: serial
+    };
+
+    fetch(`${API_URL}/passenger-report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('reportMessage', `✅ Success! Your claim ID is: <strong>${data.claim_id}</strong>. Please save this for tracking.`);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showError('reportError', '❌ ' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showError('reportError', '❌ Connection error!');
+        });
+}

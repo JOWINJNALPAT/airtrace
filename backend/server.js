@@ -102,11 +102,11 @@ app.get('/api/search-items', async (req, res) => {
 // ADD ITEM
 app.post('/api/add-item', async (req, res) => {
     try {
-        const { flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff_id } = req.body;
+        const { flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff_id, passenger_id } = req.body;
         const { rows } = await db.query(
-            `INSERT INTO item (flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING item_id`,
-            [flight_number, item_name, description, serial_number, category_id, location_id || null, status, date_found || new Date(), registered_by_staff_id || null]
+            `INSERT INTO item (flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff_id, passenger_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING item_id`,
+            [flight_number, item_name, description, serial_number, category_id, location_id || null, status, date_found || new Date(), registered_by_staff_id || null, passenger_id || null]
         );
         res.json({ success: true, message: 'Item added', id: rows[0].item_id });
     } catch (error) {
@@ -190,6 +190,60 @@ app.get('/api/locations', async (req, res) => {
     }
 });
 
+// --------------------------------------------
+// PASSENGER-DRIVEN REPORTING (Lost Item + Claim)
+// --------------------------------------------
+app.post('/api/passenger-report', async (req, res) => {
+    const client = await db.connect();
+    try {
+        await client.query('BEGIN');
+        const {
+            first_name, last_name, email, phone_number, passport_number,
+            flight_number, category_id, item_name, description, serial_number
+        } = req.body;
+
+        // 1. Ensure Passenger exists or create new
+        let passengerId;
+        const pCheck = await client.query('SELECT passenger_id FROM passenger WHERE email = $1', [email]);
+        if (pCheck.rows.length > 0) {
+            passengerId = pCheck.rows[0].passenger_id;
+        } else {
+            const pInsert = await client.query(
+                `INSERT INTO passenger (first_name, last_name, email, phone_number, passport_number)
+                 VALUES ($1, $2, $3, $4, $5) RETURNING passenger_id`,
+                [first_name, last_name, email, phone_number, passport_number]
+            );
+            passengerId = pInsert.rows[0].passenger_id;
+        }
+
+        // 2. Create Lost Item
+        const iInsert = await client.query(
+            `INSERT INTO item (item_name, description, serial_number, status, flight_number, category_id, passenger_id)
+             VALUES ($1, $2, $3, 'Lost', $4, $5, $6) RETURNING item_id`,
+            [item_name, description, serial_number, flight_number, category_id, passengerId]
+        );
+        const itemId = iInsert.rows[0].item_id;
+
+        // 3. Create Claim
+        const cInsert = await client.query(
+            `INSERT INTO claim (passenger_id, item_id, status)
+             VALUES ($1, $2, 'Pending') RETURNING claim_id`,
+            [passengerId, itemId]
+        );
+        const claimId = cInsert.rows[0].claim_id;
+
+        await client.query('COMMIT');
+        res.json({ success: true, message: 'Report submitted successfully', claim_id: claimId });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Report Error:', error);
+        res.json({ success: false, message: 'Server error: ' + error.message });
+    } finally {
+        client.release();
+    }
+});
+
+// START SERVER
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server on port ${PORT}`);
