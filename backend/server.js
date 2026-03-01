@@ -1,11 +1,11 @@
 // ============================================
-// AIRTRACE BACKEND SERVER (MySQL)
+// AIRTRACE BACKEND SERVER (PostgreSQL)
 // ============================================
 require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 
 const app = express();
 
@@ -13,6 +13,7 @@ const app = express();
 const allowed = process.env.ALLOWED_ORIGINS || '*';
 app.use(cors({
     origin: function (origin, callback) {
+        // allow all for now if no specific list is provided, or check against list
         if (!origin || allowed === '*' || allowed.split(',').includes(origin)) {
             callback(null, true);
         } else {
@@ -22,23 +23,24 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// DATABASE CONNECTION (MySQL)
-const db = mysql.createPool({
+// DATABASE CONNECTION (PostgreSQL)
+const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
     host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
+    user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'airtrace',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+    ssl: process.env.DB_HOST && process.env.DB_HOST !== 'localhost' ? { rejectUnauthorized: false } : false
 });
 
-console.log('✅ MySQL pool created');
+db.connect()
+    .then(() => console.log('✅ PostgreSQL pool created'))
+    .catch(err => console.error('❌ Connection error', err.stack));
 
 // TEST ROUTE 
 app.get('/', (req, res) => {
-    res.json({ message: '✈️ AirTrace Backend is Running on MySQL!' });
+    res.json({ message: '✈️ AirTrace Backend is Running on PostgreSQL!' });
 });
 
 // SEARCH ITEMS
@@ -49,7 +51,6 @@ app.get('/api/search-items', async (req, res) => {
             return res.json({ success: false, message: 'Required fields missing' });
         }
 
-        const connection = await db.getConnection();
         let query = `
             SELECT i.*, c.category_name, f.airline_name, f.origin_airport, f.arrival_time,
                    l.terminal_code, l.zone_type, l.specific_spot
@@ -60,12 +61,12 @@ app.get('/api/search-items', async (req, res) => {
             WHERE 1=1
         `;
         let params = [];
-        if (flight_number) { query += ' AND i.flight_number = ?'; params.push(flight_number); }
-        if (claim_id) { query += ' AND i.item_id IN (SELECT item_id FROM claim WHERE claim_id = ?)'; params.push(claim_id); }
-        if (passenger_id) { query += ' AND i.item_id IN (SELECT item_id FROM claim WHERE passenger_id = ?)'; params.push(passenger_id); }
+        let pIndex = 1;
+        if (flight_number) { query += ` AND i.flight_number = $${pIndex++}`; params.push(flight_number); }
+        if (claim_id) { query += ` AND i.item_id IN (SELECT item_id FROM claim WHERE claim_id = $${pIndex++})`; params.push(claim_id); }
+        if (passenger_id) { query += ` AND i.item_id IN (SELECT item_id FROM claim WHERE passenger_id = $${pIndex++})`; params.push(passenger_id); }
 
-        const [rows] = await connection.query(query, params);
-        connection.release();
+        const { rows } = await db.query(query, params);
 
         res.json({ success: true, count: rows.length, items: rows });
     } catch (error) {
@@ -78,14 +79,12 @@ app.get('/api/search-items', async (req, res) => {
 app.post('/api/add-item', async (req, res) => {
     try {
         const { flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff } = req.body;
-        const connection = await db.getConnection();
-        const [result] = await connection.query(
+        const { rows } = await db.query(
             `INSERT INTO item (flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING item_id`,
             [flight_number, item_name, description, serial_number, category_id, location_id || null, status, date_found || new Date(), registered_by_staff || null]
         );
-        connection.release();
-        res.json({ success: true, message: 'Item added', id: result.insertId });
+        res.json({ success: true, message: 'Item added', id: rows[0].item_id });
     } catch (error) {
         res.json({ success: false, message: 'Server error: ' + error.message });
     }
@@ -95,14 +94,12 @@ app.post('/api/add-item', async (req, res) => {
 app.post('/api/create-claim', async (req, res) => {
     try {
         const { passenger_id, item_id, claim_date, status, proof_of_ownership, resolution_date } = req.body;
-        const connection = await db.getConnection();
-        const [result] = await connection.query(
+        const { rows } = await db.query(
             `INSERT INTO claim (passenger_id, item_id, claim_date, status, proof_of_ownership, resolution_date)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING claim_id`,
             [passenger_id, item_id, claim_date || new Date(), status || 'Pending', proof_of_ownership || null, resolution_date || null]
         );
-        connection.release();
-        res.json({ success: true, claim_id: result.insertId });
+        res.json({ success: true, claim_id: rows[0].claim_id });
     } catch (error) {
         res.json({ success: false, message: 'Server error: ' + error.message });
     }
@@ -113,15 +110,16 @@ app.put('/api/update-item/:item_id', async (req, res) => {
     try {
         const { status, location_id } = req.body;
         const item_id = req.params.item_id;
-        const connection = await db.getConnection();
-        let query = 'UPDATE item SET status = ?';
+
+        let query = 'UPDATE item SET status = $1';
         let params = [status];
-        if (location_id) { query += ', location_id = ?'; params.push(location_id); }
-        query += ' WHERE item_id = ?';
+        let pIndex = 2;
+        if (location_id) { query += `, location_id = $${pIndex++}`; params.push(location_id); }
+        query += ` WHERE item_id = $${pIndex++}`;
         params.push(item_id);
-        const [result] = await connection.query(query, params);
-        connection.release();
-        res.json({ success: result.affectedRows > 0 });
+
+        const result = await db.query(query, params);
+        res.json({ success: result.rowCount > 0 });
     } catch (error) {
         res.json({ success: false, message: 'Server error: ' + error.message });
     }
@@ -131,9 +129,7 @@ app.put('/api/update-item/:item_id', async (req, res) => {
 app.post('/api/staff-login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const connection = await db.getConnection();
-        const [rows] = await connection.query('SELECT * FROM staff WHERE username = ? AND password = ?', [username, password]);
-        connection.release();
+        const { rows } = await db.query('SELECT * FROM staff WHERE username = $1 AND password = $2', [username, password]);
         if (rows.length > 0) {
             res.json({ success: true, staff: rows[0] });
         } else {
@@ -146,22 +142,28 @@ app.post('/api/staff-login', async (req, res) => {
 
 // GET UTILITIES (Categories, Flights, Locations)
 app.get('/api/categories', async (req, res) => {
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM category');
-    connection.release();
-    res.json({ success: true, categories: rows });
+    try {
+        const { rows } = await db.query('SELECT * FROM category');
+        res.json({ success: true, categories: rows });
+    } catch (err) {
+        res.json({ success: false, message: err.message });
+    }
 });
 app.get('/api/flights', async (req, res) => {
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM flight');
-    connection.release();
-    res.json({ success: true, flights: rows });
+    try {
+        const { rows } = await db.query('SELECT * FROM flight');
+        res.json({ success: true, flights: rows });
+    } catch (err) {
+        res.json({ success: false, message: err.message });
+    }
 });
 app.get('/api/locations', async (req, res) => {
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM location');
-    connection.release();
-    res.json({ success: true, locations: rows });
+    try {
+        const { rows } = await db.query('SELECT * FROM location');
+        res.json({ success: true, locations: rows });
+    } catch (err) {
+        res.json({ success: false, message: err.message });
+    }
 });
 
 const PORT = process.env.PORT || 3000;

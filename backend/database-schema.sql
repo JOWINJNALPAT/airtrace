@@ -1,14 +1,14 @@
--- MySQL Schema for AirTrace
+-- PostgreSQL Schema for AirTrace
 
 CREATE TABLE location (
-    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    location_id SERIAL PRIMARY KEY,
     terminal_code VARCHAR(10),
     zone_type VARCHAR(50),
     specific_spot VARCHAR(255)
 );
 
 CREATE TABLE category (
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL,
     storage_requirements VARCHAR(255)
 );
@@ -17,11 +17,11 @@ CREATE TABLE flight (
     flight_number VARCHAR(20) PRIMARY KEY,
     airline_name VARCHAR(100),
     origin_airport VARCHAR(10),
-    arrival_time DATETIME
+    arrival_time TIMESTAMP
 );
 
 CREATE TABLE passenger (
-    passenger_id INT AUTO_INCREMENT PRIMARY KEY,
+    passenger_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     phone_number VARCHAR(20),
@@ -31,7 +31,7 @@ CREATE TABLE passenger (
 );
 
 CREATE TABLE staff (
-    staff_id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_id SERIAL PRIMARY KEY,
     employee_id VARCHAR(50) UNIQUE NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE staff (
 );
 
 CREATE TABLE item (
-    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id SERIAL PRIMARY KEY,
     location_id INT,
     flight_number VARCHAR(20),
     category_id INT,
@@ -48,7 +48,7 @@ CREATE TABLE item (
     description TEXT,
     serial_number VARCHAR(100),
     status VARCHAR(50) NOT NULL DEFAULT 'Found',
-    date_found DATETIME DEFAULT CURRENT_TIMESTAMP,
+    date_found TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (location_id) REFERENCES location(location_id),
     FOREIGN KEY (flight_number) REFERENCES flight(flight_number),
     FOREIGN KEY (category_id) REFERENCES category(category_id),
@@ -56,13 +56,13 @@ CREATE TABLE item (
 );
 
 CREATE TABLE claim (
-    claim_id INT AUTO_INCREMENT PRIMARY KEY,
+    claim_id SERIAL PRIMARY KEY,
     passenger_id INT NOT NULL,
     item_id INT NOT NULL,
-    claim_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    claim_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(50) NOT NULL DEFAULT 'Pending',
     proof_of_ownership TEXT,
-    resolution_date DATETIME,
+    resolution_date TIMESTAMP,
     FOREIGN KEY (passenger_id) REFERENCES passenger(passenger_id),
     FOREIGN KEY (item_id) REFERENCES item(item_id)
 );
