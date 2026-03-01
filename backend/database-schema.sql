@@ -10,6 +10,17 @@
 -- \c airtrace
 
 -- ============================================
+-- DESTROY OLD TABLES FOR CLEAN REBUILD (Careful with order)
+-- ============================================
+DROP TABLE IF EXISTS claim CASCADE;
+DROP TABLE IF EXISTS item CASCADE;
+DROP TABLE IF EXISTS flight CASCADE;
+DROP TABLE IF EXISTS category CASCADE;
+DROP TABLE IF EXISTS location CASCADE;
+DROP TABLE IF EXISTS staff CASCADE;
+DROP TABLE IF EXISTS passenger CASCADE;
+
+-- ============================================
 -- TABLE: PASSENGER
 -- ============================================
 CREATE TABLE IF NOT EXISTS passenger (
