@@ -115,8 +115,21 @@
                         <input type="text" id="itemName" placeholder="e.g., Black Samsonite suitcase" required>
                     </div>
                     <div class="form-group">
+                        <label for="passengerId">Passenger ID (Optional)</label>
+                        <input type="number" id="passengerId" placeholder="e.g., 14">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="serialNumber">Serial / Tag Number</label>
                         <input type="text" id="serialNumber" placeholder="e.g., SN-4821-X (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label for="locationId">Where Was It Found?</label>
+                        <select id="locationId">
+                            <option value="">Select location…</option>
+                        </select>
                     </div>
                 </div>
 
@@ -127,12 +140,6 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="locationId">Where Was It Found?</label>
-                        <select id="locationId">
-                            <option value="">Select location…</option>
-                        </select>
-                    </div>
                     <div class="form-group">
                         <label for="itemStatus">Status</label>
                         <select id="itemStatus" required>

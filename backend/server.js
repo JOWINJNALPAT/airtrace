@@ -88,7 +88,7 @@ app.get('/api/search-items', async (req, res) => {
         let pIndex = 1;
         if (flight_number) { query += ` AND UPPER(i.flight_number) = UPPER($${pIndex++})`; params.push(flight_number); }
         if (claim_id) { query += ` AND i.item_id IN (SELECT item_id FROM claim WHERE claim_id = $${pIndex++})`; params.push(claim_id); }
-        if (passenger_id) { query += ` AND i.item_id IN (SELECT item_id FROM claim WHERE passenger_id = $${pIndex++})`; params.push(passenger_id); }
+        if (passenger_id) { query += ` AND (i.passenger_id = $${pIndex} OR i.item_id IN (SELECT item_id FROM claim WHERE passenger_id = $${pIndex}))`; params.push(passenger_id); pIndex++; }
 
         const { rows } = await db.query(query, params);
 
@@ -233,7 +233,7 @@ app.post('/api/passenger-report', async (req, res) => {
         const claimId = cInsert.rows[0].claim_id;
 
         await client.query('COMMIT');
-        res.json({ success: true, message: 'Report submitted successfully', claim_id: claimId });
+        res.json({ success: true, message: 'Report submitted successfully', claim_id: claimId, passenger_id: passengerId });
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Report Error:', error);

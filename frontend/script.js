@@ -24,9 +24,10 @@ API_URL = API_URL.replace(/\/+$/, '');
 function searchItems() {
     const flightNumber = document.getElementById('flightNumber')?.value?.trim() || '';
     const claimId = document.getElementById('claimId')?.value?.trim() || '';
+    const passengerId = document.getElementById('passengerId')?.value?.trim() || '';
 
-    if (!flightNumber && !claimId) {
-        showError('errorMessage', 'Please enter flight number or claim ID!');
+    if (!flightNumber && !claimId && !passengerId) {
+        showError('errorMessage', 'Please enter flight number, claim ID, or passenger ID!');
         return;
     }
 
@@ -36,7 +37,8 @@ function searchItems() {
 
     let url = `${API_URL}/search-items?`;
     if (flightNumber) url += `flight_number=${flightNumber}`;
-    if (claimId) url += `${flightNumber ? '&' : ''}claim_id=${claimId}`;
+    if (claimId) url += `${url.includes('=') ? '&' : ''}claim_id=${claimId}`;
+    if (passengerId) url += `${url.includes('=') ? '&' : ''}passenger_id=${passengerId}`;
 
     fetch(url)
         .then(response => response.json())
@@ -96,6 +98,11 @@ function displayItems(items) {
                         <span class="item-field-label">Description</span>
                         <span class="item-field-value">${item.description || '—'}</span>
                     </div>
+                    ${item.passenger_id ? `
+                    <div class="item-field">
+                        <span class="item-field-label">Passenger ID</span>
+                        <span class="item-field-value" style="color: var(--sky-400); font-weight: 700;">#P-${item.passenger_id}</span>
+                    </div>` : ''}
                 </div>
             </div>
         `;
@@ -131,6 +138,7 @@ function addItem() {
     const categoryId = document.getElementById('categoryId')?.value;
     const locationId = document.getElementById('locationId')?.value;
     const status = document.getElementById('itemStatus')?.value || 'Found';
+    const passengerId = document.getElementById('passengerId')?.value?.trim();
 
     if (!flightNumber || !itemName || !categoryId) {
         showError('addError', '⚠️ Please fill in all required fields (Flight, Item Name, Category)!');
@@ -153,7 +161,8 @@ function addItem() {
         category_id: parseInt(categoryId),
         location_id: locationId ? parseInt(locationId) : null,
         status: status,
-        registered_by_staff_id: staffId
+        registered_by_staff_id: staffId,
+        passenger_id: passengerId ? parseInt(passengerId) : null
     };
 
     fetch(`${API_URL}/add-item`, {
@@ -578,7 +587,7 @@ function reportLostItem() {
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                showSuccess('reportMessage', `✅ Success! Your claim ID is: <strong>${data.claim_id}</strong>. Please save this for tracking.`);
+                showSuccess('reportMessage', `✅ Success! Your <strong>Passenger ID is #${data.passenger_id}</strong> and your Claim ID is #${data.claim_id}. Please save these for verification with staff.`);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 showError('reportError', '❌ ' + data.message);
