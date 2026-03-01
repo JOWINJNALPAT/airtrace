@@ -60,9 +60,20 @@
                     onkeypress="if(event.key==='Enter') staffLogin()">
             </div>
 
-            <button onclick="staffLogin()" class="btn btn-primary btn-full" style="margin-top:10px;">
+            <button onclick="staffLogin()" class="btn btn-primary btn-full"
+                style="margin-top:10px; margin-bottom: 20px;">
                 Sign In &rarr;
             </button>
+
+            <div class="quick-logins"
+                style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom: 20px;">
+                <button
+                    onclick="document.getElementById('username').value='admin1'; document.getElementById('password').value='password123'; staffLogin();"
+                    class="btn btn-secondary" style="font-size:12px; padding: 6px 12px;">Login as Admin</button>
+                <button
+                    onclick="document.getElementById('username').value='staff1'; document.getElementById('password').value='password123'; staffLogin();"
+                    class="btn btn-secondary" style="font-size:12px; padding: 6px 12px;">Login as Staff</button>
+            </div>
 
             <div id="loginError" class="error" style="display:none;"></div>
             <div id="loginSuccess" class="success" style="display:none;"></div>
