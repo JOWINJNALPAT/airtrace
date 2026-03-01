@@ -6,6 +6,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 
@@ -41,6 +43,28 @@ db.connect()
 // TEST ROUTE 
 app.get('/', (req, res) => {
     res.json({ message: '✈️ AirTrace Backend is Running on PostgreSQL!' });
+});
+
+// INIT DB ROUTE (Temporary)
+app.get('/api/init-db', async (req, res) => {
+    try {
+        const schemaPath = path.join(__dirname, 'database-schema.sql');
+        const schema = fs.readFileSync(schemaPath, 'utf8');
+        await db.query(`
+            DROP TABLE IF EXISTS claim CASCADE;
+            DROP TABLE IF EXISTS item CASCADE;
+            DROP TABLE IF EXISTS staff CASCADE;
+            DROP TABLE IF EXISTS passenger CASCADE;
+            DROP TABLE IF EXISTS flight CASCADE;
+            DROP TABLE IF EXISTS category CASCADE;
+            DROP TABLE IF EXISTS location CASCADE;
+        `);
+        await db.query(schema);
+        res.json({ success: true, message: '✅ Database initialized successfully!' });
+    } catch (err) {
+        console.error('Init error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 // SEARCH ITEMS
