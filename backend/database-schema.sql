@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS location (
 CREATE TABLE IF NOT EXISTS category (
     category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL UNIQUE,
-    storage_requirements VARCHAR(255),
+    storage_requirement VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS item (
     location_id INT,
     flight_number VARCHAR(20),
     category_id INT NOT NULL,
-    registered_by_staff INT,
+    registered_by_staff_id INT,
     item_name VARCHAR(100) NOT NULL,
     description TEXT,
     serial_number VARCHAR(100) UNIQUE,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS item (
     FOREIGN KEY (location_id) REFERENCES location(location_id),
     FOREIGN KEY (flight_number) REFERENCES flight(flight_number),
     FOREIGN KEY (category_id) REFERENCES category(category_id),
-    FOREIGN KEY (registered_by_staff) REFERENCES staff(staff_id)
+    FOREIGN KEY (registered_by_staff_id) REFERENCES staff(staff_id)
 );
 
 -- ============================================
@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS claim (
     claim_id SERIAL PRIMARY KEY,
     passenger_id INT NOT NULL,
     item_id INT NOT NULL,
+    processed_by_staff_id INT,
     claim_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) CHECK (status IN ('Pending', 'Verified', 'Resolved')) NOT NULL DEFAULT 'Pending',
     proof_of_ownership VARCHAR(255),
@@ -102,6 +103,7 @@ CREATE TABLE IF NOT EXISTS claim (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (passenger_id) REFERENCES passenger(passenger_id),
     FOREIGN KEY (item_id) REFERENCES item(item_id),
+    FOREIGN KEY (processed_by_staff_id) REFERENCES staff(staff_id),
     UNIQUE (passenger_id, item_id)
 );
 
@@ -121,7 +123,7 @@ CREATE INDEX IF NOT EXISTS idx_claim_status ON claim(status);
 -- ============================================
 
 -- Sample Categories
-INSERT INTO category (category_name, storage_requirements) VALUES 
+INSERT INTO category (category_name, storage_requirement) VALUES 
 ('Suitcase', 'Standard luggage storage'),
 ('Backpack', 'Regular backpack area'),
 ('Electronics', 'Secure, climate-controlled'),
@@ -158,7 +160,7 @@ INSERT INTO passenger (first_name, last_name, phone_number, email, passport_numb
 ('Sarah', 'Johnson', '+1-555-1234', 'sarah.johnson@email.com', 'US555123');
 
 -- Sample Items
-INSERT INTO item (flight_number, item_name, description, category_id, location_id, status, date_found, registered_by_staff) VALUES 
+INSERT INTO item (flight_number, item_name, description, category_id, location_id, status, date_found, registered_by_staff_id) VALUES 
 ('BA123', 'Black Suitcase', 'Large black rolling suitcase with gold locks', 1, 1, 'Found', '2026-02-01 14:35:00', 2),
 ('AA456', 'Blue Backpack', 'North Face backpack with laptop compartment', 2, 2, 'Found', '2026-02-01 15:50:00', 2),
 ('LH789', 'Canon Camera', 'Professional DSLR camera with lens', 3, 3, 'Found', '2026-02-01 16:25:00', 3),
@@ -171,14 +173,14 @@ INSERT INTO item (flight_number, item_name, description, category_id, location_i
 ('BA123', 'Documents Folder', 'Brown leather document folder with business cards', 3, 1, 'Lost', '2026-02-01 12:30:00', 1);
 
 -- Sample Claims
-INSERT INTO claim (passenger_id, item_id, status, proof_of_ownership) VALUES 
-(1, 1, 'Verified', 'Passport copy'),
-(2, 2, 'Pending', null),
-(3, 3, 'Verified', 'Receipt'),
-(1, 4, 'Pending', null),
-(2, 5, 'Verified', 'ID photo'),
-(3, 6, 'Pending', null),
-(1, 7, 'Pending', 'Email confirmation'),
-(2, 8, 'Verified', 'Booking reference'),
-(3, 9, 'Pending', null),
-(1, 10, 'Verified', 'Travel insurance doc');
+INSERT INTO claim (passenger_id, item_id, status, proof_of_ownership, processed_by_staff_id) VALUES 
+(1, 1, 'Verified', 'Passport copy', 2),
+(2, 2, 'Pending', null, 5),
+(3, 3, 'Verified', 'Receipt', 2),
+(1, 4, 'Pending', null, 5),
+(2, 5, 'Verified', 'ID photo', 2),
+(3, 6, 'Pending', null, 5),
+(1, 7, 'Pending', 'Email confirmation', 2),
+(2, 8, 'Verified', 'Booking reference', 5),
+(3, 9, 'Pending', null, 2),
+(1, 10, 'Verified', 'Travel insurance doc', 5);

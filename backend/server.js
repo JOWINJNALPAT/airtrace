@@ -102,11 +102,11 @@ app.get('/api/search-items', async (req, res) => {
 // ADD ITEM
 app.post('/api/add-item', async (req, res) => {
     try {
-        const { flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff } = req.body;
+        const { flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff_id } = req.body;
         const { rows } = await db.query(
-            `INSERT INTO item (flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff)
+            `INSERT INTO item (flight_number, item_name, description, serial_number, category_id, location_id, status, date_found, registered_by_staff_id)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING item_id`,
-            [flight_number, item_name, description, serial_number, category_id, location_id || null, status, date_found || new Date(), registered_by_staff || null]
+            [flight_number, item_name, description, serial_number, category_id, location_id || null, status, date_found || new Date(), registered_by_staff_id || null]
         );
         res.json({ success: true, message: 'Item added', id: rows[0].item_id });
     } catch (error) {
@@ -117,11 +117,11 @@ app.post('/api/add-item', async (req, res) => {
 // CREATE CLAIM
 app.post('/api/create-claim', async (req, res) => {
     try {
-        const { passenger_id, item_id, claim_date, status, proof_of_ownership, resolution_date } = req.body;
+        const { passenger_id, item_id, claim_date, status, proof_of_ownership, resolution_date, processed_by_staff_id } = req.body;
         const { rows } = await db.query(
-            `INSERT INTO claim (passenger_id, item_id, claim_date, status, proof_of_ownership, resolution_date)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING claim_id`,
-            [passenger_id, item_id, claim_date || new Date(), status || 'Pending', proof_of_ownership || null, resolution_date || null]
+            `INSERT INTO claim (passenger_id, item_id, claim_date, status, proof_of_ownership, resolution_date, processed_by_staff_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING claim_id`,
+            [passenger_id, item_id, claim_date || new Date(), status || 'Pending', proof_of_ownership || null, resolution_date || null, processed_by_staff_id || null]
         );
         res.json({ success: true, claim_id: rows[0].claim_id });
     } catch (error) {

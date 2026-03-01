@@ -138,6 +138,12 @@ function addItem() {
 
     document.getElementById('addError').style.display = 'none';
 
+    let staffId = null;
+    try {
+        const staffData = localStorage.getItem('staff');
+        if (staffData) staffId = JSON.parse(staffData).staff_id;
+    } catch (e) { }
+
     const itemData = {
         flight_number: flightNumber,
         item_name: itemName,
@@ -145,7 +151,8 @@ function addItem() {
         serial_number: serialNumber,
         category_id: parseInt(categoryId),
         location_id: locationId ? parseInt(locationId) : null,
-        status: status
+        status: status,
+        registered_by_staff_id: staffId
     };
 
     fetch(`${API_URL}/add-item`, {
@@ -296,11 +303,18 @@ function createClaim() {
         return;
     }
 
+    let staffId = null;
+    try {
+        const staffData = localStorage.getItem('staff');
+        if (staffData) staffId = JSON.parse(staffData).staff_id;
+    } catch (e) { }
+
     const claimData = {
         passenger_id: parseInt(passengerId),
         item_id: parseInt(itemId),
         status: 'Pending',
-        proof_of_ownership: proofOfOwnership || null
+        proof_of_ownership: proofOfOwnership || null,
+        processed_by_staff_id: staffId
     };
 
     fetch(`${API_URL}/create-claim`, {
