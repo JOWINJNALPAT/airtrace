@@ -257,17 +257,25 @@ window.addEventListener('DOMContentLoaded', () => {
                 backBtn.href = staff.role === 'Admin' ? 'admin-login.html' : 'staff-login.html';
             }
 
+            const claimPanel = document.getElementById('claimPanel');
+            const claimDivider = document.getElementById('claimDivider');
+            const updatePanel = document.getElementById('updatePanel');
+            const updateDivider = document.getElementById('updateDivider');
+            const registerPanel = document.getElementById('registerPanel');
+
             if (staff.role !== 'Admin') {
-                const claimPanel = document.getElementById('claimPanel');
-                const claimDivider = document.getElementById('claimDivider');
                 if (claimPanel) claimPanel.style.display = 'none';
                 if (claimDivider) claimDivider.style.display = 'none';
+                if (updatePanel) updatePanel.style.display = 'none';
+                if (updateDivider) updateDivider.style.display = 'none';
 
                 if (pageHeader) pageHeader.textContent = 'Desk Staff Dashboard';
-                if (pageDesc) pageDesc.textContent = 'Restricted View: Register found items and update item statuses only.';
+                if (pageDesc) pageDesc.textContent = 'Restricted View: Register newly found items only.';
             } else {
+                if (registerPanel) registerPanel.style.display = 'none';
+
                 if (pageHeader) pageHeader.textContent = 'Admin Management Dashboard';
-                if (pageDesc) pageDesc.textContent = 'Full Access: Register items, manage passenger claims, and oversee operations.';
+                if (pageDesc) pageDesc.textContent = 'Management View: Manage passenger claims and update item statuses.';
             }
         } catch (e) {
             console.error('Error parsing staff data', e);

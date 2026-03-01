@@ -148,7 +148,8 @@ INSERT INTO staff (username, password, role, employee_id) VALUES
 ('staff1', 'staff123', 'Staff', 'EMP000'),
 ('admin1', 'admin123', 'Admin', 'EMP001'),
 ('staff2', 'staff123', 'Staff', 'EMP002'),
-('staff3', 'staff123', 'Staff', 'EMP003');
+('staff3', 'staff123', 'Staff', 'EMP003'),
+('admin2', 'admin123', 'Admin', 'EMP004');
 
 -- Sample Passengers
 INSERT INTO passenger (first_name, last_name, phone_number, email, passport_number) VALUES 
