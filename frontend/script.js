@@ -717,16 +717,105 @@ function passengerLogin() {
     });
 }
 
-// INJECT BACKGROUND VIDEO
+// INJECT CINEMATIC BACKGROUND ENVIRONMENT
 document.addEventListener('DOMContentLoaded', () => {
-    if (!document.getElementById('bg-video')) {
-        const videoHtml = `
-            <video autoplay loop muted playsinline id="bg-video" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -2; opacity: 0.35;">
-                <source src="https://assets.mixkit.co/videos/preview/mixkit-airplane-taking-off-in-the-sky-29835-large.mp4" type="video/mp4">
-            </video>
-            <div id="bg-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--navy-950); opacity: 0.85; z-index: -1; pointer-events: none;"></div>
+    if (!document.getElementById('cinematic-bg') && !document.getElementById('bg-video')) {
+        const bgHtml = `
+            <div id="cinematic-bg" style="position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: var(--navy-950);">
+                <!-- Scene Focus Target & Image -->
+                <div class="bg-scene" style="position: absolute; inset: -2%; background: url('hero-bg.png') center/cover no-repeat;"></div>
+                
+                <!-- Dark Vignette Overlay -->
+                <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(5,11,24,0.1) 20%, rgba(5,11,24,0.95) 100%);"></div>
+
+                <!-- Digital Tracking Overlay Elements -->
+                <div class="tracking-box appear-delay">
+                    <div class="corner top-left"></div><div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div><div class="corner bottom-right"></div>
+                    <div class="scan-line"></div>
+                    <div class="tracking-label">TARGET ACQUIRED // RED_SUITCASE</div>
+                </div>
+
+                <!-- Signal Pings mimicking interface data extraction -->
+                <div class="ping ping-1"></div>
+                <div class="ping ping-2"></div>
+                <div class="ping ping-3"></div>
+            </div>
+
+            <!-- Cinematic Animation Styling -->
+            <style>
+                /* Override body to allow visibility of background elements at z-index:0 */
+                body { background: transparent !important; }
+
+                /* Camera Focus/Stabilization Effect */
+                .bg-scene {
+                    opacity: 0.5;
+                    filter: blur(15px);
+                    animation: stabilizeCamera 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+                }
+                @keyframes stabilizeCamera {
+                    0% { filter: blur(28px) brightness(0.3); transform: scale(1.15); opacity: 0; }
+                    100% { filter: blur(0px) brightness(1); transform: scale(1); opacity: 0.7; }
+                }
+
+                /* Glowing Tracking Box */
+                .tracking-box {
+                    position: absolute; 
+                    top: 50%; left: 50%; 
+                    width: 280px; height: 190px;
+                    transform: translate(-50%, -50%); 
+                    opacity: 0;
+                    border: 1px solid rgba(14, 165, 233, 0.2);
+                    box-shadow: inset 0 0 20px rgba(14, 165, 233, 0.1), 0 0 30px rgba(14, 165, 233, 0.3);
+                }
+                .appear-delay {
+                    animation: acquireTarget 1.5s ease-out 2s forwards;
+                }
+                @keyframes acquireTarget {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); border-color: transparent; }
+                    60% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.02); border-color: rgba(14, 165, 233, 0.6); }
+                    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); border-color: rgba(14, 165, 233, 0.5); }
+                }
+
+                /* HUD Crosshair Corners */
+                .corner { position: absolute; width: 16px; height: 16px; border-color: var(--sky-400); border-style: solid; border-width: 0; box-shadow: 0 0 10px var(--sky-400); }
+                .top-left { top: -2px; left: -2px; border-top-width: 2px; border-left-width: 2px; }
+                .top-right { top: -2px; right: -2px; border-top-width: 2px; border-right-width: 2px; }
+                .bottom-left { bottom: -2px; left: -2px; border-bottom-width: 2px; border-left-width: 2px; }
+                .bottom-right { bottom: -2px; right: -2px; border-bottom-width: 2px; border-right-width: 2px; }
+
+                /* Moving Scanner Line */
+                .scan-line {
+                    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+                    background: var(--sky-300); opacity: 0.8; box-shadow: 0 0 15px var(--sky-300);
+                    animation: scannerSlide 3s linear infinite;
+                }
+                @keyframes scannerSlide { 0% { top: 0; opacity: 0;} 10% { opacity: 1;} 50% { top: 100%; opacity: 1;} 60% { top: 100%; opacity: 0;} 100% { top: 0; opacity: 0;} }
+
+                /* Text Label on HUD */
+                .tracking-label {
+                    position: absolute; bottom: -24px; left: 0;
+                    color: var(--sky-300); font-family: 'Space Grotesk', monospace; font-size: 10px; letter-spacing: 1px;
+                    text-shadow: 0 0 5px var(--sky-500); opacity: 0;
+                    animation: pulseLabel 2s ease-in-out 3s infinite alternate;
+                }
+                @keyframes pulseLabel { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+                /* Location Pings */
+                .ping { 
+                    position: absolute; width: 80px; height: 80px; border-radius: 50%; 
+                    border: 1px solid var(--sky-400); transform: translate(-50%, -50%); opacity: 0; 
+                    animation: radarPings 4s infinite 2.5s; 
+                }
+                .ping-1 { top: 30%; left: 20%; animation-delay: 2.5s; } 
+                .ping-2 { top: 80%; right: 25%; animation-delay: 4.5s; }
+                .ping-3 { top: 15%; right: 10%; animation-delay: 6s; }
+                @keyframes radarPings { 
+                    0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0.8; } 
+                    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; } 
+                }
+            </style>
         `;
-        document.body.insertAdjacentHTML('afterbegin', videoHtml);
-        document.body.style.background = 'transparent'; // Let video show through
+        document.body.insertAdjacentHTML('afterbegin', bgHtml);
     }
 });
