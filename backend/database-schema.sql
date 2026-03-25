@@ -1,16 +1,9 @@
 -- ============================================
 -- AIRTRACE DATABASE SCHEMA (PostgreSQL)
 -- ============================================
--- This file creates all tables according to the ER diagram
--- Run this in PostgreSQL to set up the database
-
--- Note: In PostgreSQL, database creation is typically done outside the schema script.
--- If you need to create the database, do it in a separate command:
--- CREATE DATABASE airtrace;
--- \c airtrace
 
 -- ============================================
--- DESTROY OLD TABLES FOR CLEAN REBUILD (Careful with order)
+-- DESTROY OLD TABLES FOR CLEAN REBUILD
 -- ============================================
 DROP TABLE IF EXISTS claim CASCADE;
 DROP TABLE IF EXISTS item CASCADE;
@@ -23,7 +16,7 @@ DROP TABLE IF EXISTS passenger CASCADE;
 -- ============================================
 -- TABLE: PASSENGER
 -- ============================================
-CREATE TABLE IF NOT EXISTS passenger (
+CREATE TABLE passenger (
     passenger_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -37,11 +30,11 @@ CREATE TABLE IF NOT EXISTS passenger (
 -- ============================================
 -- TABLE: STAFF
 -- ============================================
-CREATE TABLE IF NOT EXISTS staff (
+CREATE TABLE staff (
     staff_id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(10) CHECK (role IN ('Admin', 'Staff')) NOT NULL DEFAULT 'Staff',
+    role VARCHAR(20) NOT NULL DEFAULT 'Staff' CHECK (role IN ('Admin', 'Staff')),
     employee_id VARCHAR(50) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -49,7 +42,7 @@ CREATE TABLE IF NOT EXISTS staff (
 -- ============================================
 -- TABLE: FLIGHT
 -- ============================================
-CREATE TABLE IF NOT EXISTS flight (
+CREATE TABLE flight (
     flight_number VARCHAR(20) PRIMARY KEY,
     airline_name VARCHAR(100) NOT NULL,
     origin_airport VARCHAR(100) NOT NULL,
@@ -60,10 +53,10 @@ CREATE TABLE IF NOT EXISTS flight (
 -- ============================================
 -- TABLE: LOCATION
 -- ============================================
-CREATE TABLE IF NOT EXISTS location (
+CREATE TABLE location (
     location_id SERIAL PRIMARY KEY,
     terminal_code VARCHAR(10) NOT NULL,
-    zone_type VARCHAR(10) CHECK (zone_type IN ('Gate', 'Duty', 'Free')) NOT NULL,
+    zone_type VARCHAR(20) NOT NULL,
     specific_spot VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -71,7 +64,7 @@ CREATE TABLE IF NOT EXISTS location (
 -- ============================================
 -- TABLE: CATEGORY
 -- ============================================
-CREATE TABLE IF NOT EXISTS category (
+CREATE TABLE category (
     category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL UNIQUE,
     storage_requirement VARCHAR(255),
@@ -81,58 +74,52 @@ CREATE TABLE IF NOT EXISTS category (
 -- ============================================
 -- TABLE: ITEM (LUGGAGE/ITEMS)
 -- ============================================
-CREATE TABLE IF NOT EXISTS item (
+CREATE TABLE item (
     item_id SERIAL PRIMARY KEY,
-    location_id INT,
-    flight_number VARCHAR(20),
-    category_id INT NOT NULL,
-    passenger_id INT,
-    registered_by_staff_id INT,
+    location_id INT REFERENCES location(location_id),
+    flight_number VARCHAR(20) REFERENCES flight(flight_number),
+    category_id INT NOT NULL REFERENCES category(category_id),
+    passenger_id INT REFERENCES passenger(passenger_id),
+    registered_by_staff_id INT REFERENCES staff(staff_id),
     item_name VARCHAR(100) NOT NULL,
     description TEXT,
     serial_number VARCHAR(100) UNIQUE,
-    status VARCHAR(20) CHECK (status IN ('Lost', 'Found', 'Returned', 'Verified')) NOT NULL DEFAULT 'Found',
+    baggage_id VARCHAR(100) UNIQUE,
+    status VARCHAR(20) NOT NULL DEFAULT 'Found' CHECK (status IN ('Lost', 'Found', 'Returned', 'Verified')),
     date_found TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (location_id) REFERENCES location(location_id),
-    FOREIGN KEY (flight_number) REFERENCES flight(flight_number),
-    FOREIGN KEY (category_id) REFERENCES category(category_id),
-    FOREIGN KEY (passenger_id) REFERENCES passenger(passenger_id),
-    FOREIGN KEY (registered_by_staff_id) REFERENCES staff(staff_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
 -- TABLE: CLAIM
 -- ============================================
-CREATE TABLE IF NOT EXISTS claim (
+CREATE TABLE claim (
     claim_id SERIAL PRIMARY KEY,
-    passenger_id INT NOT NULL,
-    item_id INT NOT NULL,
-    processed_by_staff_id INT,
+    passenger_id INT NOT NULL REFERENCES passenger(passenger_id),
+    item_id INT NOT NULL REFERENCES item(item_id),
+    processed_by_staff_id INT REFERENCES staff(staff_id),
+    flight_number VARCHAR(20) REFERENCES flight(flight_number),
     claim_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) CHECK (status IN ('Pending', 'Verified', 'Resolved')) NOT NULL DEFAULT 'Pending',
+    status VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'Verified', 'Resolved', 'Found', 'Returned')),
     proof_of_ownership VARCHAR(255),
     resolution_date TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (passenger_id) REFERENCES passenger(passenger_id),
-    FOREIGN KEY (item_id) REFERENCES item(item_id),
-    FOREIGN KEY (processed_by_staff_id) REFERENCES staff(staff_id),
     UNIQUE (passenger_id, item_id)
 );
 
 -- ============================================
 -- INDEXES FOR BETTER PERFORMANCE
 -- ============================================
-CREATE INDEX IF NOT EXISTS idx_item_flight ON item(flight_number);
-CREATE INDEX IF NOT EXISTS idx_item_category ON item(category_id);
-CREATE INDEX IF NOT EXISTS idx_item_location ON item(location_id);
-CREATE INDEX IF NOT EXISTS idx_item_status ON item(status);
-CREATE INDEX IF NOT EXISTS idx_claim_passenger ON claim(passenger_id);
-CREATE INDEX IF NOT EXISTS idx_claim_item ON claim(item_id);
-CREATE INDEX IF NOT EXISTS idx_claim_status ON claim(status);
+CREATE INDEX idx_item_flight ON item(flight_number);
+CREATE INDEX idx_item_category ON item(category_id);
+CREATE INDEX idx_item_location ON item(location_id);
+CREATE INDEX idx_item_status ON item(status);
+CREATE INDEX idx_claim_passenger ON claim(passenger_id);
+CREATE INDEX idx_claim_item ON claim(item_id);
+CREATE INDEX idx_claim_status ON claim(status);
 
 -- ============================================
--- SAMPLE DATA (Optional - for testing)
+-- SAMPLE DATA
 -- ============================================
 
 -- Sample Categories

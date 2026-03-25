@@ -35,7 +35,7 @@ OLD                      →    NEW
 
 ### 2. `backend/package.json`
 **Status:** ℹ️ NO CHANGES
-**Dependencies:** Same as before (express, cors, mysql2, dotenv)
+**Dependencies:** Same as before (express, cors, pg, dotenv)
 
 ### 3. `backend/database-schema.sql` 
 **Status:** ✨ NEW FILE CREATED

@@ -11,7 +11,7 @@ AirTrace has been completely updated to match the professional ER diagram schema
 
 ## 🔄 Major Changes
 
-### Database Architecture
+### Database Architecture (Switched to PostgreSQL)
 **Before (Version 1.0):**
 - Single "luggage" table with basic fields
 - Minimal relational structure
@@ -374,19 +374,19 @@ Database schema includes sample data:
 
 1. **Back up your old database:**
    ```bash
-   mysqldump -u root -p airtrace > airtrace_backup.sql
+   pg_dump -U your_user airtrace > airtrace_backup.sql
    ```
 
 2. **Drop old tables:**
    ```bash
-   mysql -u root -p
+   psql -U postgres
    DROP DATABASE airtrace;
    CREATE DATABASE airtrace;
    ```
 
 3. **Import new schema:**
    ```bash
-   mysql -u root -p airtrace < backend/database-schema.sql
+   psql -U postgres -d airtrace -f backend/database-schema.sql
    ```
 
 4. **Update backend files:**

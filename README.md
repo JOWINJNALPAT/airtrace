@@ -94,19 +94,20 @@ npm install
 The backend now reads connection details and runtime settings from environment variables.
 Set the following (Render will provide values; locally you can use a `.env` file with [dotenv] or export vars):
 
+- `DATABASE_URL` (standard for Render/PostgreSQL)
 - `DB_HOST` (default: localhost)
-- `DB_USER` (default: root)
+- `DB_USER` (default: postgres)
 - `DB_PASSWORD` (default: empty)
 - `DB_NAME` (default: airtrace)
-- `DB_PORT` (default: 3306)
+- `DB_PORT` (default: 5432)
 - `ALLOWED_ORIGINS` (comma-separated origins allowed by CORS, `*` for all)
 - `PORT` (Render and similar platforms set this automatically)
 
 Example `.env`:
 ```
 DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=2288
+DB_USER=postgres
+DB_PASSWORD=your_password
 DB_NAME=airtrace
 ALLOWED_ORIGINS=http://localhost:5500
 ```
@@ -373,7 +374,7 @@ Three main sections:
 Run the `database-schema.sql` file to create all tables:
 
 ```bash
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U your_user -d airtrace -f backend/database-schema.sql
 ```
 
 ### What Gets Created:

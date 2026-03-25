@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Registration — AirTrace</title>
+    <meta name="api-base-url" content="https://airtrace1.onrender.com">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">✈</div>
+                Air<span>Trace</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="search.html">Find Luggage</a></li>
+                <li><a href="staff-login.html" class="active">Staff Portal</a></li>
+                <li><a href="admin-login.html">Admin Portal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="login-logo">
+                <div class="logo-mark" style="font-size:28px;">✈</div>
+                <h2>Staff Registration</h2>
+                <p class="subtitle">Secure account creation for personnel</p>
+            </div>
+
+            <div class="form-group">
+                <label for="regEmployeeId">Employee ID / Badge No</label>
+                <input type="text" id="regEmployeeId" placeholder="EMP001" onkeypress="if(event.key==='Enter') registerStaff('Staff')">
+            </div>
+
+            <div class="form-group">
+                <label for="regUsername">Desired Username</label>
+                <input type="text" id="regUsername" placeholder="staff1" onkeypress="if(event.key==='Enter') registerStaff('Staff')">
+            </div>
+
+            <div class="form-group">
+                <label for="regPassword">Password</label>
+                <input type="password" id="regPassword" placeholder="••••••••" onkeypress="if(event.key==='Enter') registerStaff('Staff')">
+            </div>
+
+            <button onclick="registerStaff('Staff')" class="btn btn-primary btn-full" style="margin-top: 10px; margin-bottom: 15px;">
+                Create Staff Account &rarr;
+            </button>
+            <button onclick="window.location.href='staff-login.html'" class="btn btn-secondary btn-full" style="margin-bottom: 10px;">
+                Back to Login
+            </button>
+
+            <div id="registerError" class="error" style="display:none; margin-top:20px;"></div>
+            <div id="registerSuccess" class="success" style="display:none; margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

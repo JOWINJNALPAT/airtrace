@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Simple serial number updater for AirTrace database
-
-const mysql = require('mysql2/promise');
+// Simple serial number updater for AirTrace database (PostgreSQL)
+require('dotenv').config();
+const { Client } = require('pg');
 const readline = require('readline');
 
 const rl = readline.createInterface({
@@ -10,16 +10,18 @@ const rl = readline.createInterface({
 });
 
 async function main() {
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '2288',
-        database: 'airtrace'
-    });
+    const config = {
+        connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER || 'postgres'}:${process.env.DB_PASSWORD || ''}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME || 'airtrace'}`,
+        ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+    };
+
+    const client = new Client(config);
 
     try {
+        await client.connect();
+
         // Show current items
-        const [items] = await connection.query(`
+        const { rows: items } = await client.query(`
             SELECT item_id, item_name, serial_number FROM item ORDER BY item_id
         `);
 
@@ -30,28 +32,29 @@ async function main() {
         });
 
         // Ask for update
-        const itemId = await question('Enter Item ID to update (1-6): ');
+        const itemId = await question('Enter Item ID to update: ');
         const newSerial = await question('Enter new serial number: ');
 
         if (!itemId || !newSerial) {
             console.log('❌ Item ID and serial number are required');
-            await connection.end();
+            await client.end();
+            rl.close();
             return;
         }
 
         // Update
-        const result = await connection.query(
-            'UPDATE item SET serial_number = ? WHERE item_id = ?',
+        const result = await client.query(
+            'UPDATE item SET serial_number = $1 WHERE item_id = $2',
             [newSerial, parseInt(itemId)]
         );
 
-        if (result[0].affectedRows > 0) {
+        if (result.rowCount > 0) {
             console.log(`\n✅ Item ${itemId} updated successfully!`);
-            
+
             // Show updated item
-            const [updated] = await connection.query(
-                'SELECT item_id, item_name, serial_number FROM item WHERE item_id = ?',
-                [itemId]
+            const { rows: updated } = await client.query(
+                'SELECT item_id, item_name, serial_number FROM item WHERE item_id = $1',
+                [parseInt(itemId)]
             );
             console.table(updated);
         } else {
@@ -62,7 +65,7 @@ async function main() {
         console.error('❌ Error:', error.message);
     } finally {
         rl.close();
-        await connection.end();
+        await client.end();
     }
 }
 

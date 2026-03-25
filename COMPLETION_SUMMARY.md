@@ -10,7 +10,7 @@ Your AirTrace system has been **completely updated and redesigned** to match the
 
 ### ✅ Backend System (Production Ready)
 - **server.js** - 559 lines of Node.js/Express code with 12 API endpoints
-- **database-schema.sql** - Complete MySQL schema with 7 tables and sample data
+- **database-schema.sql** - Complete PostgreSQL schema with 7 tables and sample data
 - **package.json** - All dependencies configured
 
 ### ✅ Frontend System (Fully Functional)
@@ -106,7 +106,7 @@ Your AirTrace system has been **completely updated and redesigned** to match the
 **package.json** - Dependencies
 - Express framework
 - CORS support
-- MySQL driver
+- PostgreSQL driver
 - All required packages
 
 ### Frontend Files
@@ -263,7 +263,7 @@ Open: **START_HERE.md**
 
 ### 2. Setup Database (2 minutes)
 ```bash
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U postgres -d airtrace -f backend/database-schema.sql
 ```
 
 ### 3. Start Backend (1 minute)
@@ -362,7 +362,7 @@ Check: **FILE_LISTING.md**
 
 You now have:
 ✅ A complete, production-ready luggage management system
-✅ Professional 7-table relational database
+✅ Professional 7-table PostgreSQL database
 ✅ 12 powerful API endpoints
 ✅ Modern frontend with staff dashboard
 ✅ Comprehensive documentation

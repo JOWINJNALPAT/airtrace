@@ -133,12 +133,12 @@ function searchFromHome() {
 function addItem() {
     const flightNumber = document.getElementById('flightNumber')?.value?.trim();
     const itemName = document.getElementById('itemName')?.value?.trim();
+    const baggageId = document.getElementById('baggageId')?.value?.trim();
     const description = document.getElementById('itemDescription')?.value?.trim();
     const serialNumber = document.getElementById('serialNumber')?.value?.trim();
     const categoryId = document.getElementById('categoryId')?.value;
     const locationId = document.getElementById('locationId')?.value;
     const status = document.getElementById('itemStatus')?.value || 'Found';
-    const passengerId = document.getElementById('passengerId')?.value?.trim();
 
     if (!flightNumber || !itemName || !categoryId) {
         showError('addError', '⚠️ Please fill in all required fields (Flight, Item Name, Category)!');
@@ -156,13 +156,13 @@ function addItem() {
     const itemData = {
         flight_number: flightNumber,
         item_name: itemName,
+        baggage_id: baggageId,
         description: description,
         serial_number: serialNumber,
         category_id: parseInt(categoryId),
         location_id: locationId ? parseInt(locationId) : null,
         status: status,
-        registered_by_staff_id: staffId,
-        passenger_id: passengerId ? parseInt(passengerId) : null
+        registered_by_staff_id: staffId
     };
 
     fetch(`${API_URL}/add-item`, {
@@ -344,18 +344,27 @@ function loadClaims() {
                         <td style="padding: 16px 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--sky-400);">#C-${c.claim_id}</td>
                         <td style="padding: 16px 8px;">
                             <div style="font-weight: 600; color: var(--white);">${c.first_name} ${c.last_name}</div>
-                            <div style="font-size: 11px; color: var(--text-500); margin-top: 2px;">Passenger ID: ${c.passenger_id}</div>
                         </td>
                         <td style="padding: 16px 8px;">
                             <div style="font-weight: 600;">${c.item_name}</div>
                             <div style="font-size: 11px; color: var(--text-500); margin-top: 2px;">Item ID: ${c.item_id} • ${c.item_status}</div>
+                            <div style="font-size: 11px; color: var(--sky-400); margin-top: 2px;">
+                                <span style="opacity: 0.7;">Location:</span> ${c.terminal_code || 'N/A'} ${c.specific_spot ? '— ' + c.specific_spot : ''}
+                            </div>
                         </td>
                         <td style="padding: 16px 8px; font-size: 0.85em; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-300);">${c.proof_of_ownership || '<span style="opacity:0.3">No proof provided</span>'}</td>
                         <td style="padding: 16px 8px;">
                             <span class="status-badge ${c.status.toLowerCase()}" style="font-size: 9px; padding: 3px 8px;">${c.status}</span>
                         </td>
                         <td style="padding: 16px 8px;">
-                            <button onclick="prepareProcess(${c.item_id}, '${c.status}')" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8em; border-radius: 6px;">Process</button>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="prepareProcess(${c.item_id}, '${c.status}', '${(c.proof_of_ownership || '').replace(/'/g, "\\'")}')" class="btn ${c.status === 'Verified' ? 'btn-secondary' : 'btn-primary'}" style="padding: 6px 12px; font-size: 0.8em; border-radius: 6px;">
+                                    ${c.status === 'Verified' ? 'Edit Proof' : 'Process'}
+                                </button>
+                                ${c.status === 'Verified' ? `
+                                    <button onclick="quickHandover(${c.item_id})" class="btn" style="padding: 6px 12px; font-size: 0.8em; border-radius: 6px; background: var(--sky-500); color: white;">Handover</button>
+                                ` : ''}
+                            </div>
                         </td>
                     </tr>
                 `).join('');
@@ -364,9 +373,12 @@ function loadClaims() {
         .catch(err => console.error('Error loading claims:', err));
 }
 
-function prepareProcess(itemId, currentStatus) {
+function prepareProcess(itemId, currentStatus, proof) {
     document.getElementById('updateItemId').value = itemId;
     document.getElementById('updateStatus').value = currentStatus === 'Pending' ? 'Verified' : currentStatus;
+    if (document.getElementById('updateProof')) {
+        document.getElementById('updateProof').value = proof || '';
+    }
 
     // Smooth scroll to update panel
     document.getElementById('updatePanel').scrollIntoView({ behavior: 'smooth' });
@@ -383,6 +395,7 @@ function prepareProcess(itemId, currentStatus) {
 function updateItemStatus() {
     const itemId = document.getElementById('updateItemId')?.value?.trim();
     const newStatus = document.getElementById('updateStatus')?.value;
+    const proof = document.getElementById('updateProof')?.value?.trim();
 
     if (!itemId || !newStatus) {
         showError('updateError', '⚠️ Please fill in item ID and status!');
@@ -390,7 +403,9 @@ function updateItemStatus() {
     }
 
     const updateData = {
-        status: newStatus
+        status: newStatus,
+        proof_of_ownership: proof,
+        sync_claim: true // flag to tell backend to update associated claim
     };
 
     fetch(`${API_URL}/update-item/${itemId}`, {
@@ -401,9 +416,14 @@ function updateItemStatus() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showSuccess('updateMessage', `✅ Status updated for Item #${itemId}`);
-                if (document.getElementById('claimsTableBody')) loadClaims();
-                loadStats(); // Refresh stats
+                showSuccess('updateMessage', `✅ <strong>Success!</strong> Item #${itemId} updated to <strong>${newStatus}</strong>.`);
+
+                // Small delay to ensure DB sync before refresh
+                setTimeout(() => {
+                    if (document.getElementById('claimsTableBody')) loadClaims();
+                    loadStats();
+                }, 500);
+
                 clearForm();
             } else {
                 showError('updateError', '❌ ' + (data.message || 'Error updating status'));
@@ -413,6 +433,31 @@ function updateItemStatus() {
             console.error('Error:', error);
             showError('updateError', '❌ Error connecting to server!');
         });
+}
+
+function quickHandover(itemId) {
+    if (!confirm('Mark this item as Handed Over to Passenger? This will resolve the claim.')) return;
+
+    fetch(`${API_URL}/update-item/${itemId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            status: 'Returned',
+            sync_claim: true,
+            proof_of_ownership: 'Handed over directly by staff'
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Item marked as Returned and Claim Resolved!');
+                loadClaims();
+                loadStats();
+            } else {
+                alert('❌ Error: ' + data.message);
+            }
+        })
+        .catch(err => alert('❌ Connection Error'));
 }
 
 // ============================================
@@ -490,11 +535,50 @@ function adminLogin() {
 }
 
 // ============================================
+// 4c. STAFF/ADMIN REGISTRATION FUNCTION
+// ============================================
+function registerStaff(role) {
+    const username = document.getElementById('regUsername')?.value?.trim();
+    const password = document.getElementById('regPassword')?.value?.trim();
+    const employeeId = document.getElementById('regEmployeeId')?.value?.trim();
+
+    if (!username || !password || !employeeId) {
+        showError('registerError', 'Please enter username, password, and employee ID!');
+        return;
+    }
+
+    fetch(`${API_URL}/register-staff`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role, employee_id: employeeId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('registerSuccess', `✅ Registration successful! Please log in.`);
+            setTimeout(() => {
+                if (role === 'Admin') {
+                    window.location.href = 'admin-login.html';
+                } else {
+                    window.location.href = 'staff-login.html';
+                }
+            }, 2000);
+        } else {
+            showError('registerError', '❌ ' + (data.message || 'Error registering account.'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showError('registerError', '❌ Connection error!');
+    });
+}
+
+// ============================================
 // 5. CLEAR FORM (Reset form fields)
 // ============================================
 function clearForm() {
-    const formElements = ['flightNumber', 'itemName', 'itemDescription', 'serialNumber',
-        'categoryId', 'locationId', 'itemStatus', 'passengerId', 'itemId',
+    const formElements = ['flightNumber', 'itemName', 'baggageId', 'itemDescription', 'serialNumber',
+        'categoryId', 'locationId', 'itemStatus', 'itemId', 'updateItemId', 'updateStatus', 'updateProof',
         'proofOfOwnership', 'ticketNum', 'passengerName', 'luggageColor',
         'luggageSize', 'luggageDescription', 'luggageStatus'];
 
@@ -527,7 +611,7 @@ function showError(elementId, message) {
 function showSuccess(elementId, message) {
     const successElement = document.getElementById(elementId);
     if (successElement) {
-        successElement.textContent = message;
+        successElement.innerHTML = message;
         successElement.style.display = 'block';
     }
 }
@@ -598,3 +682,51 @@ function reportLostItem() {
             showError('reportError', '❌ Connection error!');
         });
 }
+
+// ============================================
+// 7. PASSENGER LOGIN FUNCTION
+// ============================================
+function passengerLogin() {
+    const email = document.getElementById('p-email')?.value?.trim();
+    const passport = document.getElementById('p-passport')?.value?.trim();
+
+    if (!email || !passport) {
+        showError('loginError', 'Please enter email and passport number!');
+        return;
+    }
+
+    fetch(`${API_URL}/passenger-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password_or_passport: passport })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('loginSuccess', '✅ Login successful! Redirecting...');
+            localStorage.setItem('passenger', JSON.stringify(data.passenger));
+            setTimeout(() => {
+                window.location.href = 'passenger-portal.html';
+            }, 2000);
+        } else {
+            showError('loginError', '❌ ' + (data.message || 'Invalid credentials'));
+        }
+    })
+    .catch(err => {
+        showError('loginError', '❌ Connection error!');
+    });
+}
+
+// INJECT BACKGROUND VIDEO
+document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('bg-video')) {
+        const videoHtml = `
+            <video autoplay loop muted playsinline id="bg-video" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -2; opacity: 0.35;">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-airplane-taking-off-in-the-sky-29835-large.mp4" type="video/mp4">
+            </video>
+            <div id="bg-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--navy-950); opacity: 0.85; z-index: -1; pointer-events: none;"></div>
+        `;
+        document.body.insertAdjacentHTML('afterbegin', videoHtml);
+        document.body.style.background = 'transparent'; // Let video show through
+    }
+});

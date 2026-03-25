@@ -15,7 +15,7 @@
 │  HTML/CSS/JavaScript │  Node.js/Express     │
 │                      │                      │
 │  - index.html        │  - 12 API endpoints  │
-│  - search.html       │  - MySQL queries     │
+│  - search.html       │  - PostgreSQL queries │
 │  - add-luggage.html  │  - Data validation   │
 │  - staff-login.html  │  - Error handling    │
 │                      │                      │
@@ -26,7 +26,7 @@
     ┌────────────────────────────────┐
     │      DATABASE LAYER            │
     ├────────────────────────────────┤
-    │       MySQL Database           │
+    │       PostgreSQL Database      │
     │    7 Tables + Relationships    │
     │    8 Performance Indexes       │
     │    6 Foreign Key Constraints   │
@@ -331,7 +331,7 @@ CAPACITY:
 │ Unlimited items     │
 │ Unlimited claims    │
 │ Performance depends │
-│ on MySQL setup      │
+│ on PostgreSQL setup  │
 └─────────────────────┘
 
 PERFORMANCE:
@@ -364,7 +364,7 @@ DEVELOPMENT:
 ├────────────────────────────────────┤
 │   Backend: localhost:3000          │
 │   Frontend: file:// or localhost   │
-│   Database: localhost MySQL        │
+│   Database: localhost PostgreSQL   │
 └────────────────────────────────────┘
 
 PRODUCTION (Recommended):
@@ -373,7 +373,7 @@ PRODUCTION (Recommended):
 ├────────────────────────────────────┤
 │   Frontend: CDN / Static hosting   │
 │   Backend: Node.js server          │
-│   Database: Managed MySQL service  │
+│   Database: Managed PostgreSQL service│
 │   HTTPS: SSL certificate           │
 └────────────────────────────────────┘
 ```
@@ -417,7 +417,7 @@ AirTrace/
 
 ### To Start the System:
 ```
-1. mysql < backend/database-schema.sql
+1. psql -U postgres -d airtrace -f backend/database-schema.sql
 2. cd backend && npm start
 3. Open frontend/index.html
 4. Login: admin1 / password123

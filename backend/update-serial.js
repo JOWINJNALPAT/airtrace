@@ -1,24 +1,21 @@
-// Update serial numbers in the database
-const mysql = require('mysql2/promise');
+// Update serial numbers in the database (PostgreSQL)
+require('dotenv').config();
+const { Client } = require('pg');
 
 async function updateSerialNumbers() {
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '2288',
-        database: 'airtrace'
-    });
+    const config = {
+        connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER || 'postgres'}:${process.env.DB_PASSWORD || ''}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME || 'airtrace'}`,
+        ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+    };
+
+    const client = new Client(config);
 
     try {
+        await client.connect();
         console.log('📊 Current items and serial numbers:\n');
-        const [rows] = await connection.query('SELECT item_id, item_name, serial_number FROM item');
+        const { rows } = await client.query('SELECT item_id, item_name, serial_number FROM item');
         console.table(rows);
 
-        console.log('\n\n💡 To update a serial number, modify the values below and run:');
-        console.log('\nExample: Update item_id 1 with serial number "SN-BA123-001"');
-        console.log('Command: UPDATE item SET serial_number = "SN-BA123-001" WHERE item_id = 1;\n');
-
-        // Example updates with unique serial numbers
         const updates = [
             { item_id: 1, serial: 'SN-BA123-BLK-2026-001' },
             { item_id: 2, serial: 'SN-AA456-BLU-2026-002' },
@@ -31,8 +28,8 @@ async function updateSerialNumbers() {
         console.log('🔄 Updating serial numbers with unique identifiers...\n');
         for (const update of updates) {
             try {
-                await connection.query(
-                    'UPDATE item SET serial_number = ? WHERE item_id = ?',
+                await client.query(
+                    'UPDATE item SET serial_number = $1 WHERE item_id = $2',
                     [update.serial, update.item_id]
                 );
                 console.log(`✅ Item ${update.item_id}: Updated to ${update.serial}`);
@@ -42,16 +39,15 @@ async function updateSerialNumbers() {
         }
 
         console.log('\n✅ Serial numbers updated successfully!');
-        
-        // Show updated items
+
         console.log('\n📊 Updated items:\n');
-        const [updatedRows] = await connection.query('SELECT item_id, item_name, serial_number FROM item');
+        const { rows: updatedRows } = await client.query('SELECT item_id, item_name, serial_number FROM item');
         console.table(updatedRows);
 
     } catch (error) {
         console.error('❌ Error:', error);
     } finally {
-        await connection.end();
+        await client.end();
     }
 }
 

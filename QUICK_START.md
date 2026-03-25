@@ -4,15 +4,15 @@
 
 ### Step 1: Create Database
 ```bash
-# Connect to MySQL
-mysql -u root -p
+# Connect to PostgreSQL
+psql -U postgres
 
 # Create database
 CREATE DATABASE airtrace;
-EXIT;
+\q
 
 # Import schema
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U postgres -d airtrace -f backend/database-schema.sql
 ```
 
 ### Step 2: Start Backend Server
@@ -222,8 +222,8 @@ CATEGORY and STAFF also link to ITEM
 ## 🐛 Troubleshooting
 
 ### Backend won't start
-- Check MySQL is running
-- Check credentials in `server.js` match your MySQL
+- Check PostgreSQL is running
+- Check credentials in `.env` or `server.js` match your PostgreSQL
 - Check database `airtrace` exists
 - Run: `npm install` first
 
@@ -233,7 +233,7 @@ CATEGORY and STAFF also link to ITEM
 - Check API_URL in script.js is correct
 
 ### Database connection error
-- Verify MySQL password is `2288` (or change in server.js)
+- Verify PostgreSQL password is correct
 - Check database `airtrace` is created
 - Run the schema setup command again
 
@@ -302,7 +302,7 @@ curl http://localhost:3000
 ```bash
 # Stop the server (Ctrl+C)
 # Drop and recreate database
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U postgres -d airtrace -f backend/database-schema.sql
 # Restart server
 npm start
 ```

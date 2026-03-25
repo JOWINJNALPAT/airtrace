@@ -10,7 +10,7 @@ Your AirTrace system has been **completely redesigned** from v1.0 to v2.0 with a
 ### The System Includes:
 - ✅ **Backend:** Node.js/Express server with 12 API endpoints
 - ✅ **Frontend:** 4 HTML pages with modern UI/UX
-- ✅ **Database:** MySQL schema with 7 tables and relationships
+- ✅ **Database:** PostgreSQL schema with 7 tables and relationships
 - ✅ **Documentation:** 9 comprehensive guides (45+ pages)
 - ✅ **Sample Data:** 20+ test records ready to use
 
@@ -126,7 +126,7 @@ AirTrace/
 
 ### Step 1: Create Database (2 min)
 ```bash
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U postgres -d airtrace -f backend/database-schema.sql
 ```
 
 ### Step 2: Start Backend (1 min)
@@ -293,7 +293,7 @@ Staff Dashboard:
 
 **server.js** (559 lines)
 - 12 API endpoints
-- MySQL queries with JOINs
+- PostgreSQL queries with JOINs
 - Error handling
 - CORS support
 - Request validation
@@ -306,7 +306,7 @@ Staff Dashboard:
 - Comments explaining everything
 
 **package.json**
-- Dependencies: express, cors, mysql2
+- Dependencies: express, cors, pg
 - Scripts: npm start
 - Versions pinned
 
@@ -464,7 +464,7 @@ AFTER (v2.0):
 - Troubleshooting: QUICK_START.md
 - Browser console: Press F12
 - Server logs: Check terminal
-- Database: Verify MySQL running
+- Database: Verify PostgreSQL running
 
 ### Need to Understand?
 - Architecture: VISUAL_GUIDE.md

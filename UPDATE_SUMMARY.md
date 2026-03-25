@@ -129,7 +129,7 @@ Contains complete SQL schema with:
 
 ### How to Set Up:
 ```bash
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U postgres -d airtrace -f backend/database-schema.sql
 ```
 
 ---
@@ -186,7 +186,7 @@ PASSENGER ──→ CLAIM ←── ITEM ←── FLIGHT
 
 ### 1. Set Up Database
 ```bash
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U postgres -d airtrace -f backend/database-schema.sql
 ```
 
 ### 2. Start Backend
@@ -250,10 +250,10 @@ Open in browser:
 
 1. **Create Database:**
    ```bash
-   mysql -u root -p
-   mysql> CREATE DATABASE airtrace;
-   mysql> EXIT;
-   mysql -u root -p airtrace < backend/database-schema.sql
+   psql -U postgres
+   postgres=# CREATE DATABASE airtrace;
+   postgres=# \q
+   psql -U postgres -d airtrace -f backend/database-schema.sql
    ```
 
 2. **Install and Run Backend:**

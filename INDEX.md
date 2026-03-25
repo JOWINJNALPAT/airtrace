@@ -223,7 +223,7 @@ AirTrace/
 ## ✅ Pre-Start Checklist
 
 Before you begin, make sure you have:
-- [ ] MySQL installed and running
+- [ ] PostgreSQL installed and running
 - [ ] Node.js installed (for backend)
 - [ ] A code editor (VS Code recommended)
 - [ ] Internet browser

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Dashboard — AirTrace</title>
+    <meta name="api-base-url" content="https://airtrace1.onrender.com">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .portal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .portal-header h2 {
+            font-size: 28px;
+            color: var(--white);
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">✈</div>
+                Air<span>Trace</span>
+            </div>
+            <ul class="nav-links">
+                <li><span id="passengerNameNav" style="color: var(--sky-400); font-weight: 600;">WelcomePassenger</span></li>
+                <li class="nav-cta"><a href="#" onclick="logoutPassenger()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container page-top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Home
+        </a>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="portal-header">
+                <h2 id="welcomeHeader">My Luggage Dashboard</h2>
+                <a href="passenger-report.html" class="btn btn-primary">Report Another Item</a>
+            </div>
+
+            <div class="panel">
+                <h3><div class="panel-icon">📋</div> My Reported Items and Complaints</h3>
+                <div style="overflow-x: auto; margin-top: 15px;">
+                    <table class="data-table" style="width: 100%; text-align: left; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--glass-border-1); color: var(--text-500); font-size: 11px; text-transform: uppercase;">
+                                <th style="padding: 12px 8px;">Date</th>
+                                <th style="padding: 12px 8px;">Item Name</th>
+                                <th style="padding: 12px 8px;">Flight</th>
+                                <th style="padding: 12px 8px;">Item Status</th>
+                                <th style="padding: 12px 8px;">Claim Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="passengerItemsTableBody">
+                            <tr><td colspan="5" style="text-align: center; padding: 20px;">Loading your items...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pData = localStorage.getItem('passenger');
+            if (!pData) {
+                window.location.href = 'passenger-login.html';
+                return;
+            }
+            const passenger = JSON.parse(pData);
+            document.getElementById('passengerNameNav').textContent = passenger.first_name + ' ' + passenger.last_name;
+            document.getElementById('welcomeHeader').textContent = 'Welcome, ' + passenger.first_name;
+
+            fetch(`${API_URL}/passenger-items/${passenger.passenger_id}`)
+                .then(r => r.json())
+                .then(data => {
+                    const tbody = document.getElementById('passengerItemsTableBody');
+                    if (data.success && data.items.length > 0) {
+                        tbody.innerHTML = data.items.map(item => {
+                            const dateStr = item.date_found ? new Date(item.date_found).toLocaleDateString() : '—';
+                            return `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding: 12px 8px; color: var(--text-300);">${dateStr}</td>
+                                <td style="padding: 12px 8px; font-weight: 600;">${item.item_name}</td>
+                                <td style="padding: 12px 8px; color: var(--text-300);">${item.flight_number || '—'}</td>
+                                <td style="padding: 12px 8px;"><span class="status-badge ${item.status.toLowerCase()}">${item.status}</span></td>
+                                <td style="padding: 12px 8px;">${item.claim_status ? `<span class="status-badge ${item.claim_status.toLowerCase()}">${item.claim_status}</span>` : '—'}</td>
+                            </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; opacity: 0.5;">You have no reported items.</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('passengerItemsTableBody').innerHTML = '<tr><td colspan="5">Error loading items.</td></tr>';
+                });
+        });
+
+        function logoutPassenger() {
+            localStorage.removeItem('passenger');
+            window.location.href = 'passenger-login.html';
+        }
+    </script>
+</body>
+</html>

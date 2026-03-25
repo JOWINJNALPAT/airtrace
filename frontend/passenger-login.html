@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Portal Login — AirTrace</title>
+    <meta name="api-base-url" content="https://airtrace1.onrender.com">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">✈</div>
+                Air<span>Trace</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="search.html">Find Luggage</a></li>
+                <li><a href="staff-login.html">Staff Portal</a></li>
+                <li><a href="admin-login.html">Admin Portal</a></li>
+                <li class="nav-cta"><a href="passenger-login.html" class="active">Passenger Portal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="login-logo">
+                <div class="logo-mark" style="font-size:28px;">🧳</div>
+                <h2>Passenger Login</h2>
+                <p class="subtitle">Log in to view your reported items and claims</p>
+            </div>
+
+            <div class="form-group">
+                <label for="p-email">Email Address</label>
+                <input type="email" id="p-email" placeholder="e.g. john@example.com" required
+                    onkeypress="if(event.key==='Enter') passengerLogin()">
+            </div>
+            <div class="form-group">
+                <label for="p-passport">Passport / ID Number</label>
+                <input type="password" id="p-passport" placeholder="Enter passport number as password" required
+                    onkeypress="if(event.key==='Enter') passengerLogin()">
+            </div>
+
+            <button onclick="passengerLogin()" class="btn btn-primary btn-full"
+                style="margin-top:10px; margin-bottom: 15px;">
+                Log In &rarr;
+            </button>
+            <button onclick="window.location.href='passenger-report.html'" class="btn btn-secondary btn-full"
+                style="margin-bottom: 20px;">
+                Register / Report New Item
+            </button>
+
+            <div id="loginError" class="error" style="display:none;"></div>
+            <div id="loginSuccess" class="success" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

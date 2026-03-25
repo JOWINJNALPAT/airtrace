@@ -198,7 +198,7 @@ ITEM (Found items)
 
 ### 1. Setup Database (2 minutes)
 ```bash
-mysql -u root -p airtrace < backend/database-schema.sql
+psql -U your_user -d airtrace -f backend/database-schema.sql
 ```
 
 ### 2. Start Backend (1 minute)
@@ -363,7 +363,7 @@ All documentation is in Markdown format:
 - Add backup procedures
 
 **For Security:**
-- Change default MySQL password
+- Change default PostgreSQL password
 - Use environment variables
 - Implement proper auth tokens
 - Add input validation

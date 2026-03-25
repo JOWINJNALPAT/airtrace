@@ -48,8 +48,11 @@
                     onkeypress="if(event.key==='Enter') adminLogin()">
             </div>
 
-            <button onclick="adminLogin()" class="btn btn-primary btn-full" style="margin-top: 10px;">
+            <button onclick="adminLogin()" class="btn btn-primary btn-full" style="margin-top: 10px; margin-bottom: 15px;">
                 Enter Admin Console &rarr;
+            </button>
+            <button onclick="window.location.href='admin-register.html'" class="btn btn-secondary btn-full" style="margin-bottom: 10px;">
+                Register Admin
             </button>
 
             <div id="loginError" class="error" style="display:none; margin-top:20px;"></div>

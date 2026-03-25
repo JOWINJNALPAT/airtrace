@@ -10,15 +10,7 @@ services:
         value: production
       - key: PORT
         value: 3000
-      - key: DB_HOST
-        sync: false
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
-      - key: DB_NAME
-        sync: false
-      - key: DB_PORT
+      - key: DATABASE_URL
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
